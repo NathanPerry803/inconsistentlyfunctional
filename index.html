@@ -5,26 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart New Tab</title>
     <meta name="description" content="Interactive smart homepage for Chrome new tab">
-    
-    <!-- Tightened CSP - blocks eval, allows actual weather APIs -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' https://unpkg.com; 
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' data: blob: https://images.unsplash.com https://picsum.photos;
-        font-src 'self' https://fonts.gstatic.com;
-        connect-src 'self' https://api.openweathermap.org https://api.weather.gov https://api.tomorrow.io https://httpbin.org;
-        frame-src 'self' https://www.youtube.com;
-        worker-src 'self' blob:;
-        manifest-src 'self';
-        upgrade-insecure-requests; 
-        block-all-mixed-content;
-    ">
-    
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235D5CDE' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E">
     
-    <!-- Pinned Lucide version for reproducibility -->
-    <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
     <!-- 
     ============================================================================
@@ -389,28 +373,6 @@
             height: 16px;
         }
         
-        /* Loading skeleton styles */
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-            border-radius: 8px;
-        }
-        
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        .skeleton-weather-current {
-            height: 80px;
-            margin-bottom: 1rem;
-        }
-        
-        .skeleton-weather-forecast {
-            height: 120px;
-        }
-        
         /* Quick Links */
         .quick-links {
             flex: 1;
@@ -712,6 +674,7 @@
             display: flex;
             gap: var(--space-sm);
             margin-bottom: var(--space-lg);
+            role: tablist;
         }
         
         .notes-tab {
@@ -721,11 +684,13 @@
             color: var(--text-secondary);
             font-size: var(--font-size-sm);
             transition: var(--transition);
+            role: tab;
         }
         
         .notes-tab.active {
             background: var(--accent);
             color: white;
+            aria-selected: true;
         }
         
         .notes-content {
@@ -854,6 +819,7 @@
             gap: var(--space-sm);
             margin-bottom: var(--space-lg);
             border-bottom: 1px solid var(--border);
+            role: tablist;
         }
         
         .settings-tab {
@@ -864,11 +830,13 @@
             color: var(--text-secondary);
             font-weight: 500;
             transition: var(--transition);
+            role: tab;
         }
         
         .settings-tab.active {
             color: var(--accent);
             border-bottom-color: var(--accent);
+            aria-selected: true;
         }
         
         .settings-section {
@@ -1149,6 +1117,17 @@
             pointer-events: none;
         }
         
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
         /* Error states */
         .error {
             color: #dc3545;
@@ -1190,7 +1169,7 @@
         </div>
         <h2 class="privacy-title">Privacy Mode Active</h2>
         <p class="privacy-description">Personal widgets are hidden for screen sharing. Click below to disable privacy mode.</p>
-        <button class="btn btn-primary" data-action="togglePrivacyMode">
+        <button class="btn btn-primary" onclick="togglePrivacyMode()">
             <i data-lucide="unlock" aria-hidden="true"></i>
             Disable Privacy Mode
         </button>
@@ -1205,13 +1184,13 @@
                 <div id="currentDate" class="current-date"></div>
             </div>
             <div class="controls">
-                <button class="icon-button" data-action="togglePrivacyMode" title="Toggle Privacy Mode" aria-label="Toggle Privacy Mode">
+                <button class="icon-button" onclick="togglePrivacyMode()" title="Toggle Privacy Mode" aria-label="Toggle Privacy Mode">
                     <i data-lucide="lock" aria-hidden="true"></i>
                 </button>
-                <button id="themeToggle" class="icon-button" data-action="toggleTheme" title="Toggle Theme (T)" aria-label="Toggle Theme">
+                <button id="themeToggle" class="icon-button" onclick="toggleTheme()" title="Toggle Theme (T)" aria-label="Toggle Theme">
                     <i data-lucide="moon" aria-hidden="true"></i>
                 </button>
-                <button class="icon-button" data-action="openSettings" title="Settings" aria-label="Open Settings">
+                <button class="icon-button" onclick="openSettings()" title="Settings" aria-label="Open Settings">
                     <i data-lucide="settings" aria-hidden="true"></i>
                 </button>
             </div>
@@ -1240,7 +1219,7 @@
             <section class="quick-links">
                 <div class="section-header">
                     <h2 class="section-title">Quick Links</h2>
-                    <button class="icon-button" data-action="addTile" title="Add New Tile (N)" aria-label="Add New Tile">
+                    <button class="icon-button" onclick="addTile()" title="Add New Tile (N)" aria-label="Add New Tile">
                         <i data-lucide="plus" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -1256,13 +1235,13 @@
                 <h3 class="sidebar-title">
                     <i data-lucide="sun" aria-hidden="true"></i>
                     Weather
-                    <button class="icon-button" data-action="refreshWeather" title="Refresh Weather" aria-label="Refresh Weather" style="margin-left: auto; width: 24px; height: 24px;">
+                    <button class="icon-button" onclick="refreshWeather()" title="Refresh Weather" aria-label="Refresh Weather" style="margin-left: auto; width: 24px; height: 24px;">
                         <i data-lucide="refresh-cw" aria-hidden="true"></i>
                     </button>
                 </h3>
                 <div id="weatherContent">
-                    <div class="skeleton skeleton-weather-current"></div>
-                    <div class="skeleton skeleton-weather-forecast"></div>
+                    <div class="skeleton" style="height: 80px; border-radius: 8px; margin-bottom: 1rem;"></div>
+                    <div class="skeleton" style="height: 120px; border-radius: 8px;"></div>
                 </div>
             </section>
 
@@ -1277,15 +1256,15 @@
                     <div id="timerLabel" class="timer-label">Focus Session</div>
                 </div>
                 <div class="timer-controls">
-                    <button id="timerStart" class="timer-button" data-action="startTimer" aria-label="Start timer">
+                    <button id="timerStart" class="timer-button" onclick="startTimer()" aria-label="Start timer">
                         <i data-lucide="play" aria-hidden="true"></i>
                         Start
                     </button>
-                    <button id="timerPause" class="timer-button secondary" data-action="pauseTimer" aria-label="Pause timer" style="display: none;">
+                    <button id="timerPause" class="timer-button secondary" onclick="pauseTimer()" aria-label="Pause timer" style="display: none;">
                         <i data-lucide="pause" aria-hidden="true"></i>
                         Pause
                     </button>
-                    <button class="timer-button secondary" data-action="resetTimer" aria-label="Reset timer">
+                    <button class="timer-button secondary" onclick="resetTimer()" aria-label="Reset timer">
                         <i data-lucide="rotate-ccw" aria-hidden="true"></i>
                         Reset
                     </button>
@@ -1302,13 +1281,13 @@
                     Notes & Goals
                 </h3>
                 <div class="notes-tabs" role="tablist">
-                    <button class="notes-tab active" data-action="switchNotesTab" data-tab="notes" aria-label="Switch to notes" role="tab" aria-selected="true">
+                    <button class="notes-tab active" onclick="switchNotesTab(event, 'notes')" aria-label="Switch to notes" role="tab" aria-selected="true">
                         Notes
                     </button>
-                    <button class="notes-tab" data-action="switchNotesTab" data-tab="goals" aria-label="Switch to goals" role="tab" aria-selected="false">
+                    <button class="notes-tab" onclick="switchNotesTab(event, 'goals')" aria-label="Switch to goals" role="tab" aria-selected="false">
                         Goals
                     </button>
-                    <button class="notes-tab" data-action="switchNotesTab" data-tab="templates" aria-label="Switch to prompt templates" role="tab" aria-selected="false">
+                    <button class="notes-tab" onclick="switchNotesTab(event, 'templates')" aria-label="Switch to prompt templates" role="tab" aria-selected="false">
                         Templates
                     </button>
                 </div>
@@ -1331,17 +1310,17 @@
         <div class="modal">
             <div class="modal-header">
                 <h2 id="settingsTitle" class="modal-title">Settings</h2>
-                <button class="modal-close" data-action="closeSettings" aria-label="Close settings">
+                <button class="modal-close" onclick="closeSettings()" aria-label="Close settings">
                     <i data-lucide="x" aria-hidden="true"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="settings-tabs" role="tablist">
-                    <button class="settings-tab active" data-action="switchSettingsTab" data-tab="general" role="tab" aria-selected="true">General</button>
-                    <button class="settings-tab" data-action="switchSettingsTab" data-tab="appearance" role="tab" aria-selected="false">Appearance</button>
-                    <button class="settings-tab" data-action="switchSettingsTab" data-tab="weather" role="tab" aria-selected="false">Weather</button>
-                    <button class="settings-tab" data-action="switchSettingsTab" data-tab="shortcuts" role="tab" aria-selected="false">Shortcuts</button>
-                    <button class="settings-tab" data-action="switchSettingsTab" data-tab="data" role="tab" aria-selected="false">Data</button>
+                    <button class="settings-tab active" onclick="switchSettingsTab(event, 'general')" role="tab" aria-selected="true">General</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'appearance')" role="tab" aria-selected="false">Appearance</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'weather')" role="tab" aria-selected="false">Weather</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'shortcuts')" role="tab" aria-selected="false">Shortcuts</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'data')" role="tab" aria-selected="false">Data</button>
                 </div>
                 
                 <div id="settingsContent">
@@ -1356,7 +1335,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h2 id="tileModalTitle" class="modal-title">Edit Tile</h2>
-                <button class="modal-close" data-action="closeTileModal" aria-label="Close tile editor">
+                <button class="modal-close" onclick="closeTileModal()" aria-label="Close tile editor">
                     <i data-lucide="x" aria-hidden="true"></i>
                 </button>
             </div>
@@ -1382,9 +1361,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-action="closeTileModal">Cancel</button>
-                <button class="btn btn-primary" data-action="saveTile">Save</button>
-                <button id="deleteTileBtn" class="btn btn-secondary" data-action="deleteTile" style="margin-right: auto;">
+                <button class="btn btn-secondary" onclick="closeTileModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTile()">Save</button>
+                <button id="deleteTileBtn" class="btn btn-secondary" onclick="deleteTile()" style="margin-right: auto;">
                     <i data-lucide="trash-2" aria-hidden="true"></i>
                     Delete
                 </button>
@@ -1397,7 +1376,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h2 id="commandModalTitle" class="modal-title">Edit Command</h2>
-                <button class="modal-close" data-action="closeCommandModal" aria-label="Close command editor">
+                <button class="modal-close" onclick="closeCommandModal()" aria-label="Close command editor">
                     <i data-lucide="x" aria-hidden="true"></i>
                 </button>
             </div>
@@ -1424,9 +1403,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-action="closeCommandModal">Cancel</button>
-                <button class="btn btn-primary" data-action="saveCommand">Save</button>
-                <button id="deleteCommandBtn" class="btn btn-secondary" data-action="deleteCommand" style="margin-right: auto;">
+                <button class="btn btn-secondary" onclick="closeCommandModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCommand()">Save</button>
+                <button id="deleteCommandBtn" class="btn btn-secondary" onclick="deleteCommand()" style="margin-right: auto;">
                     <i data-lucide="trash-2" aria-hidden="true"></i>
                     Delete
                 </button>
@@ -1439,20 +1418,10 @@
 
     <script>
         // ============================================================================
-        // SMART NEW TAB - CORE APPLICATION (SECURITY HARDENED)
+        // SMART NEW TAB - CORE APPLICATION
         // ============================================================================
         
         'use strict';
-        
-        // Known Lucide icons whitelist for security
-        const LUCIDE_ICONS = new Set([
-            'heart', 'star', 'github', 'twitter', 'linkedin', 'youtube', 'search', 'bot', 'zap', 
-            'sun', 'moon', 'cloud', 'cloud-sun', 'cloud-moon', 'cloud-rain', 'cloud-drizzle', 
-            'cloud-snow', 'cloud-fog', 'refresh-cw', 'settings', 'lock', 'unlock', 'plus', 'edit', 
-            'trash-2', 'x', 'play', 'pause', 'rotate-ccw', 'timer', 'file-text', 'help-circle',
-            'book', 'book-open', 'package', 'newspaper', 'message-circle', 'globe', 'calculator',
-            'copy', 'download', 'activity', 'sparkles'
-        ]);
         
         // Global state
         const AppState = {
@@ -1480,14 +1449,14 @@
             activeSearchIndex: -1
         };
         
-        // Default settings (API keys not persisted by default for security)
+        // Default settings
         const DefaultSettings = {
             theme: 'auto', // 'light', 'dark', 'auto'
             accentColor: '#5D5CDE',
             timeFormat: 'auto', // '12', '24', 'auto'
             showSeconds: true,
             weatherProvider: 'openweathermap', // 'openweathermap', 'weathergov', 'tomorrow'
-            weatherApiKey: '', // Not persisted by default
+            weatherApiKey: '',
             weatherUnit: 'metric', // 'metric', 'imperial'
             weatherLocation: '',
             useGeolocation: true,
@@ -1505,7 +1474,6 @@
             pomodoroLongBreak: 15,
             autoStartBreaks: false,
             notificationSound: true,
-            persistApiKeys: false, // Security setting
             searchCommands: {} // Will be populated with defaults
         };
         
@@ -1624,7 +1592,7 @@
             setTimeout(() => announcements.textContent = '', 1000);
         }
         
-        // SECURITY: Safer icon validation and creation
+        // Create icon element (Lucide or emoji fallback)
         function createIcon(iconName, fallbackEmoji = '🌐') {
             const container = document.createElement('span');
             
@@ -1636,32 +1604,22 @@
                 return container;
             }
             
-            // SECURITY: Validate against whitelist
-            if (!LUCIDE_ICONS.has(iconName)) {
-                container.textContent = fallbackEmoji;
-                return container;
-            }
-            
-            // Create Lucide icon
+            // Try to create Lucide icon
             try {
                 const iconElement = document.createElement('i');
                 iconElement.setAttribute('data-lucide', iconName);
                 container.appendChild(iconElement);
+                
+                // Initialize the icon if Lucide is available
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+                
                 return container;
             } catch (error) {
                 // Fallback to emoji
                 container.textContent = fallbackEmoji;
                 return container;
-            }
-        }
-        
-        // PERFORMANCE: Only refresh icons when needed
-        function refreshIconsIn(container) {
-            if (window.lucide && container) {
-                const icons = container.querySelectorAll('[data-lucide]');
-                if (icons.length > 0) {
-                    lucide.createIcons();
-                }
             }
         }
         
@@ -1676,57 +1634,13 @@
             return avg; // in mph
         }
         
-        // SECURITY: Safe expression evaluator (no eval)
-        function evaluateExpression(expr) {
-            // tokens: numbers and + - * / ( )
-            const tokens = expr.replace(/\s+/g,'').match(/(\d+(\.\d+)?|[+\-*/()])/g);
-            if (!tokens) throw new Error('Invalid expression');
-
-            // Shunting-yard to RPN
-            const prec = { '+':1, '-':1, '*':2, '/':2 };
-            const out = [], op = [];
-            for (const t of tokens) {
-                if (!isNaN(t)) out.push(parseFloat(t));
-                else if (t in prec) {
-                    while (op.length && prec[op.at(-1)] >= prec[t]) out.push(op.pop());
-                    op.push(t);
-                } else if (t === '(') op.push(t);
-                else if (t === ')') {
-                    while (op.length && op.at(-1) !== '(') out.push(op.pop());
-                    if (op.pop() !== '(') throw new Error('Mismatched parens');
-                } else throw new Error('Invalid token');
-            }
-            while (op.length) {
-                const o = op.pop();
-                if (o === '(') throw new Error('Mismatched parens');
-                out.push(o);
-            }
-            // Eval RPN
-            const st = [];
-            for (const t of out) {
-                if (typeof t === 'number') st.push(t);
-                else {
-                    const b = st.pop(), a = st.pop();
-                    if (a == null || b == null) throw new Error('Bad expression');
-                    st.push(t === '+' ? a+b : t === '-' ? a-b : t === '*' ? a*b : a/b);
-                }
-            }
-            if (st.length !== 1 || !isFinite(st[0])) throw new Error('Invalid expression');
-            return st[0];
-        }
-        
         // ============================================================================
         // STORAGE MANAGEMENT
         // ============================================================================
         
         function saveSettings() {
             try {
-                // SECURITY: Don't persist API keys by default
-                const settingsToSave = { ...AppState.settings };
-                if (!settingsToSave.persistApiKeys) {
-                    delete settingsToSave.weatherApiKey;
-                }
-                localStorage.setItem('smartnewtab_settings', JSON.stringify(settingsToSave));
+                localStorage.setItem('smartnewtab_settings', JSON.stringify(AppState.settings));
             } catch (error) {
                 console.error('Failed to save settings:', error);
             }
@@ -1862,13 +1776,15 @@
                 const iconElement = themeButton.querySelector('[data-lucide]');
                 if (iconElement) {
                     iconElement.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-                    refreshIconsIn(themeButton);
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
                 }
                 themeButton.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
             }
         }
         
-        // Simplified theme toggle - light -> dark -> auto
+        // FIXED: Simplified theme toggle - light -> dark -> auto
         function toggleTheme() {
             const currentTheme = AppState.settings.theme;
             let newTheme;
@@ -2243,7 +2159,7 @@
                         break;
                     }
                         
-                    case 'tomorrow': {
+                    case 'tomorrow':
                         const values = data.data.values;
                         normalized.current = {
                             temp: values.temperature,
@@ -2252,10 +2168,8 @@
                             windSpeed: values.windSpeed,
                             icon: this.getWeatherIcon(values.weatherCode, provider)
                         };
-                        // SECURITY FIX: Safe location access
-                        normalized.location = data.location?.name || 'Location';
+                        normalized.location = data.location.name || 'Location';
                         break;
-                    }
                 }
                 
                 return normalized;
@@ -2271,9 +2185,8 @@
                     '02n': { lucide: 'cloud-moon', emoji: '⛅' },
                     '03d': { lucide: 'cloud', emoji: '☁️' },
                     '03n': { lucide: 'cloud', emoji: '☁️' },
-                    // FIXED: Use 'cloud' instead of non-existent 'clouds'
-                    '04d': { lucide: 'cloud', emoji: '☁️' },
-                    '04n': { lucide: 'cloud', emoji: '☁️' },
+                    '04d': { lucide: 'clouds', emoji: '☁️' },
+                    '04n': { lucide: 'clouds', emoji: '☁️' },
                     '09d': { lucide: 'cloud-drizzle', emoji: '🌧️' },
                     '09n': { lucide: 'cloud-drizzle', emoji: '🌧️' },
                     '10d': { lucide: 'cloud-rain', emoji: '🌦️' },
@@ -2366,8 +2279,8 @@
             try {
                 // Show loading state
                 weatherContent.innerHTML = `
-                    <div class="skeleton skeleton-weather-current"></div>
-                    <div class="skeleton skeleton-weather-forecast"></div>
+                    <div class="skeleton" style="height: 80px; border-radius: 8px; margin-bottom: 1rem;"></div>
+                    <div class="skeleton" style="height: 120px; border-radius: 8px;"></div>
                 `;
                 
                 const weather = await weatherService.fetchWeather();
@@ -2463,8 +2376,10 @@
             
             weatherContent.innerHTML = html;
             
-            // PERFORMANCE: Only refresh icons in this container
-            refreshIconsIn(weatherContent);
+            // Re-initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
         
         function refreshWeather() {
@@ -2498,10 +2413,10 @@
                 </div>
                 <div class="tile-title">Add New Tile</div>
             `;
+            addTileElement.onclick = addTile;
             addTileElement.setAttribute('role', 'button');
             addTileElement.setAttribute('aria-label', 'Add new tile');
             addTileElement.setAttribute('tabindex', '0');
-            addTileElement.setAttribute('data-action', 'addTile');
             addTileElement.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -2511,8 +2426,10 @@
             
             tilesGrid.appendChild(addTileElement);
             
-            // PERFORMANCE: Initialize icons for the whole grid once
-            refreshIconsIn(tilesGrid);
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
         
         function createTileElement(tile) {
@@ -2528,13 +2445,13 @@
             
             tileElement.innerHTML = `
                 <div class="tile-controls">
-                    <button class="tile-control" data-action="editTile" data-tile-id="${tile.id}" title="Edit tile" aria-label="Edit ${tile.title}">
+                    <button class="tile-control" onclick="editTile(event, '${tile.id}')" title="Edit tile" aria-label="Edit ${tile.title}">
                         <i data-lucide="edit" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="tile-icon" aria-hidden="true">${iconElement.innerHTML}</div>
                 <div class="tile-title">${sanitizeHTML(tile.title)}</div>
-                <div class="tile-url">${sanitizeHTML(getTileDisplayUrl(tile.url))}</div>
+                <div class="tile-url">${sanitizeHTML(new URL(tile.url).hostname)}</div>
             `;
             
             // Handle middle click and ctrl+click for new tab
@@ -2559,16 +2476,6 @@
             tileElement.addEventListener('dragend', handleDragEnd);
             
             return tileElement;
-        }
-        
-        // Safe URL display that handles non-HTTP schemes
-        function getTileDisplayUrl(url) {
-            try {
-                return new URL(url).hostname;
-            } catch (error) {
-                // For non-standard URLs, return the raw string truncated
-                return url.length > 30 ? url.substring(0, 30) + '...' : url;
-            }
         }
         
         function handleDragStart(e) {
@@ -2614,7 +2521,9 @@
             openTileModal();
         }
         
-        function editTile(tileId) {
+        function editTile(event, tileId) {
+            event.preventDefault();
+            event.stopPropagation();
             AppState.currentTileId = tileId;
             openTileModal();
         }
@@ -2665,7 +2574,7 @@
                 return;
             }
             
-            // Validate URL (supports various schemes)
+            // Validate URL
             try {
                 new URL(url);
             } catch {
@@ -2818,7 +2727,7 @@
                 return `
                     <div class="search-suggestion ${index === AppState.activeSearchIndex ? 'active' : ''}" 
                          data-index="${index}" 
-                         data-action="selectSuggestion"
+                         onclick="selectSuggestion(${index})"
                          role="option"
                          aria-selected="${index === AppState.activeSearchIndex}">
                         <span class="search-suggestion-icon" aria-hidden="true">${iconElement.innerHTML}</span>
@@ -2831,8 +2740,10 @@
             suggestionsContainer.style.display = 'block';
             suggestionsContainer.setAttribute('aria-hidden', 'false');
             
-            // PERFORMANCE: Only refresh icons in suggestions
-            refreshIconsIn(suggestionsContainer);
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
         
         function hideSuggestions() {
@@ -2956,6 +2867,21 @@
             searchInput.value = '';
             hideSuggestions();
             searchInput.blur();
+        }
+        
+        function evaluateExpression(expr) {
+            // Simple safe math evaluator
+            const cleaned = expr.replace(/[^0-9+\-*/().]/g, '');
+            if (!cleaned) throw new Error('Invalid expression');
+            
+            // Basic validation to prevent code execution
+            if (/[a-zA-Z]/.test(cleaned)) throw new Error('Invalid expression');
+            
+            try {
+                return Function('"use strict"; return (' + cleaned + ')')();
+            } catch (e) {
+                throw new Error('Invalid expression');
+            }
         }
         
         // ============================================================================
@@ -3103,8 +3029,10 @@
                     pauseBtn.style.display = 'none';
                 }
                 
-                // PERFORMANCE: Only refresh icons when button state changes
-                refreshIconsIn(startBtn.parentElement);
+                // Re-initialize Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }
         }
         
@@ -3244,7 +3172,8 @@
             });
         }
         
-        function switchNotesTab(tab) {
+        // FIXED: Better tab switching that preserves textarea properly
+        function switchNotesTab(e, tab) {
             // Save current content ONLY if we have a textarea and it's visible
             const textarea = document.getElementById('notesTextarea');
             if (textarea && textarea.style.display !== 'none' && AppState.notes.current !== 'templates') {
@@ -3261,10 +3190,17 @@
                 tabEl.setAttribute('aria-selected', 'false');
             });
             
-            const activeTab = document.querySelector(`[data-tab="${tab}"]`);
-            if (activeTab) {
-                activeTab.classList.add('active');
-                activeTab.setAttribute('aria-selected', 'true');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+                e.currentTarget.setAttribute('aria-selected', 'true');
+            } else {
+                // Programmatic call - find matching tab
+                const btn = [...document.querySelectorAll('.notes-tab')]
+                    .find(b => b.textContent.trim().toLowerCase() === tab.toLowerCase());
+                if (btn) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                }
             }
             
             updateNotesContent();
@@ -3320,7 +3256,7 @@
                 <div style="height: 100%; overflow-y: auto; padding: var(--space-sm);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
                         <h4 style="margin: 0; font-size: var(--font-size-sm); font-weight: 600;">AI Prompt Templates</h4>
-                        <button class="icon-button" data-action="addTemplate" style="width: 24px; height: 24px;" title="Add Template">
+                        <button class="icon-button" onclick="addTemplate()" style="width: 24px; height: 24px;" title="Add Template">
                             <i data-lucide="plus" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -3329,13 +3265,13 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
                                 <strong style="font-size: var(--font-size-sm);">${sanitizeHTML(template.name)}</strong>
                                 <div style="display: flex; gap: var(--space-xs);">
-                                    <button class="tile-control" data-action="copyTemplate" data-index="${index}" title="Copy to clipboard">
+                                    <button class="tile-control" onclick="copyTemplate(${index})" title="Copy to clipboard">
                                         <i data-lucide="copy" aria-hidden="true"></i>
                                     </button>
-                                    <button class="tile-control" data-action="editTemplate" data-index="${index}" title="Edit template">
+                                    <button class="tile-control" onclick="editTemplate(${index})" title="Edit template">
                                         <i data-lucide="edit" aria-hidden="true"></i>
                                     </button>
-                                    <button class="tile-control" data-action="deleteTemplate" data-index="${index}" title="Delete template">
+                                    <button class="tile-control" onclick="deleteTemplate(${index})" title="Delete template">
                                         <i data-lucide="trash-2" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -3351,7 +3287,9 @@
             notesContent.innerHTML = html;
             
             // Initialize Lucide icons
-            refreshIconsIn(notesContent);
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
         
         function copyTemplate(index) {
@@ -3411,7 +3349,7 @@
             const modal = document.getElementById('settingsModal');
             modal.classList.add('active');
             modal.setAttribute('aria-hidden', 'false');
-            switchSettingsTab('general');
+            switchSettingsTab(null, 'general');
         }
         
         function closeSettings() {
@@ -3420,17 +3358,24 @@
             modal.setAttribute('aria-hidden', 'true');
         }
         
-        function switchSettingsTab(tab) {
+        function switchSettingsTab(e, tab) {
             // Update tab buttons
             document.querySelectorAll('.settings-tab').forEach(btn => {
                 btn.classList.remove('active');
                 btn.setAttribute('aria-selected', 'false');
             });
             
-            const activeTab = document.querySelector(`[data-tab="${tab}"]`);
-            if (activeTab) {
-                activeTab.classList.add('active');
-                activeTab.setAttribute('aria-selected', 'true');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+                e.currentTarget.setAttribute('aria-selected', 'true');
+            } else {
+                // Programmatic open - select matching tab
+                const btn = [...document.querySelectorAll('.settings-tab')]
+                    .find(b => b.textContent.trim().toLowerCase() === tab.toLowerCase());
+                if (btn) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                }
             }
             
             // Render tab content
@@ -3462,7 +3407,7 @@
                     <h3>Time & Date</h3>
                     <div class="settings-group">
                         <label class="settings-label">Time Format</label>
-                        <select class="settings-input" data-setting="timeFormat">
+                        <select class="settings-input" onchange="updateSetting('timeFormat', this.value)">
                             <option value="auto" ${AppState.settings.timeFormat === 'auto' ? 'selected' : ''}>Auto (based on locale)</option>
                             <option value="12" ${AppState.settings.timeFormat === '12' ? 'selected' : ''}>12 hour</option>
                             <option value="24" ${AppState.settings.timeFormat === '24' ? 'selected' : ''}>24 hour</option>
@@ -3471,14 +3416,14 @@
                     <div class="settings-row">
                         <label>Show seconds</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.showSeconds ? 'checked' : ''} data-setting="showSeconds">
+                            <input type="checkbox" ${AppState.settings.showSeconds ? 'checked' : ''} onchange="updateSetting('showSeconds', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="settings-row">
                         <label>Show greeting message</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.showGreeting ? 'checked' : ''} data-setting="showGreeting">
+                            <input type="checkbox" ${AppState.settings.showGreeting ? 'checked' : ''} onchange="updateSetting('showGreeting', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -3488,7 +3433,7 @@
                     <h3>Search</h3>
                     <div class="settings-group">
                         <label class="settings-label">Default Search Engine</label>
-                        <select class="settings-input" data-setting="searchEngine">
+                        <select class="settings-input" onchange="updateSetting('searchEngine', this.value)">
                             <option value="google" ${AppState.settings.searchEngine === 'google' ? 'selected' : ''}>Google</option>
                             <option value="duckduckgo" ${AppState.settings.searchEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
                             <option value="bing" ${AppState.settings.searchEngine === 'bing' ? 'selected' : ''}>Bing</option>
@@ -3500,27 +3445,27 @@
                     <h3>Focus Timer</h3>
                     <div class="settings-group">
                         <label class="settings-label">Focus session (minutes)</label>
-                        <input type="number" class="settings-input" min="1" max="60" value="${AppState.settings.pomodoroFocus}" data-setting="pomodoroFocus">
+                        <input type="number" class="settings-input" min="1" max="60" value="${AppState.settings.pomodoroFocus}" onchange="updateSetting('pomodoroFocus', parseInt(this.value))">
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Short break (minutes)</label>
-                        <input type="number" class="settings-input" min="1" max="30" value="${AppState.settings.pomodoroShortBreak}" data-setting="pomodoroShortBreak">
+                        <input type="number" class="settings-input" min="1" max="30" value="${AppState.settings.pomodoroShortBreak}" onchange="updateSetting('pomodoroShortBreak', parseInt(this.value))">
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Long break (minutes)</label>
-                        <input type="number" class="settings-input" min="1" max="60" value="${AppState.settings.pomodoroLongBreak}" data-setting="pomodoroLongBreak">
+                        <input type="number" class="settings-input" min="1" max="60" value="${AppState.settings.pomodoroLongBreak}" onchange="updateSetting('pomodoroLongBreak', parseInt(this.value))">
                     </div>
                     <div class="settings-row">
                         <label>Auto-start breaks</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.autoStartBreaks ? 'checked' : ''} data-setting="autoStartBreaks">
+                            <input type="checkbox" ${AppState.settings.autoStartBreaks ? 'checked' : ''} onchange="updateSetting('autoStartBreaks', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="settings-row">
                         <label>Notification sound</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.notificationSound ? 'checked' : ''} data-setting="notificationSound">
+                            <input type="checkbox" ${AppState.settings.notificationSound ? 'checked' : ''} onchange="updateSetting('notificationSound', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -3534,7 +3479,7 @@
                     <h3>Theme</h3>
                     <div class="settings-group">
                         <label class="settings-label">Color scheme</label>
-                        <select class="settings-input" data-setting="theme">
+                        <select class="settings-input" onchange="updateSetting('theme', this.value)">
                             <option value="auto" ${AppState.settings.theme === 'auto' ? 'selected' : ''}>Auto (system preference)</option>
                             <option value="light" ${AppState.settings.theme === 'light' ? 'selected' : ''}>Light</option>
                             <option value="dark" ${AppState.settings.theme === 'dark' ? 'selected' : ''}>Dark</option>
@@ -3542,7 +3487,7 @@
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Accent color</label>
-                        <input type="color" class="settings-input" value="${AppState.settings.accentColor}" data-setting="accentColor">
+                        <input type="color" class="settings-input" value="${AppState.settings.accentColor}" onchange="updateSetting('accentColor', this.value)">
                     </div>
                 </div>
                 
@@ -3550,7 +3495,7 @@
                     <h3>Layout</h3>
                     <div class="settings-group">
                         <label class="settings-label">Tile size</label>
-                        <select class="settings-input" data-setting="tileSize">
+                        <select class="settings-input" onchange="updateSetting('tileSize', this.value)">
                             <option value="small" ${AppState.settings.tileSize === 'small' ? 'selected' : ''}>Small</option>
                             <option value="medium" ${AppState.settings.tileSize === 'medium' ? 'selected' : ''}>Medium</option>
                             <option value="large" ${AppState.settings.tileSize === 'large' ? 'selected' : ''}>Large</option>
@@ -3558,13 +3503,13 @@
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Font scale</label>
-                        <input type="range" class="settings-input" min="0.8" max="1.5" step="0.1" value="${AppState.settings.fontScale}" data-setting="fontScale">
+                        <input type="range" class="settings-input" min="0.8" max="1.5" step="0.1" value="${AppState.settings.fontScale}" onchange="updateSetting('fontScale', parseFloat(this.value))">
                         <small>Current: ${(AppState.settings.fontScale * 100).toFixed(0)}%</small>
                     </div>
                     <div class="settings-row">
                         <label>Compact mode</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.compactMode ? 'checked' : ''} data-setting="compactMode">
+                            <input type="checkbox" ${AppState.settings.compactMode ? 'checked' : ''} onchange="updateSetting('compactMode', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -3574,7 +3519,7 @@
                     <h3>Background</h3>
                     <div class="settings-group">
                         <label class="settings-label">Background type</label>
-                        <select class="settings-input" data-setting="backgroundType">
+                        <select class="settings-input" onchange="updateSetting('backgroundType', this.value)">
                             <option value="solid" ${AppState.settings.backgroundType === 'solid' ? 'selected' : ''}>Solid color</option>
                             <option value="gradient" ${AppState.settings.backgroundType === 'gradient' ? 'selected' : ''}>Gradient</option>
                             <option value="image" ${AppState.settings.backgroundType === 'image' ? 'selected' : ''}>Custom image</option>
@@ -3582,7 +3527,7 @@
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Background image URL</label>
-                        <input type="url" class="settings-input" value="${AppState.settings.backgroundImage}" data-setting="backgroundImage" placeholder="https://example.com/image.jpg">
+                        <input type="url" class="settings-input" value="${AppState.settings.backgroundImage}" onchange="updateSetting('backgroundImage', this.value)" placeholder="https://example.com/image.jpg">
                         <small>Leave empty for daily Unsplash image</small>
                     </div>
                 </div>
@@ -3595,7 +3540,7 @@
                     <h3>Weather Provider</h3>
                     <div class="settings-group">
                         <label class="settings-label">Provider</label>
-                        <select class="settings-input" data-setting="weatherProvider">
+                        <select class="settings-input" onchange="updateSetting('weatherProvider', this.value)">
                             <option value="openweathermap" ${AppState.settings.weatherProvider === 'openweathermap' ? 'selected' : ''}>OpenWeatherMap</option>
                             <option value="weathergov" ${AppState.settings.weatherProvider === 'weathergov' ? 'selected' : ''}>Weather.gov (US only)</option>
                             <option value="tomorrow" ${AppState.settings.weatherProvider === 'tomorrow' ? 'selected' : ''}>Tomorrow.io</option>
@@ -3603,7 +3548,7 @@
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">API Key</label>
-                        <input type="password" class="settings-input" value="${AppState.settings.weatherApiKey}" data-setting="weatherApiKey" placeholder="Enter API key">
+                        <input type="password" class="settings-input" value="${AppState.settings.weatherApiKey}" onchange="updateSetting('weatherApiKey', this.value)" placeholder="Enter API key">
                         <small>
                             ${AppState.settings.weatherProvider === 'weathergov' ? 'No API key needed for Weather.gov' : 
                               AppState.settings.weatherProvider === 'openweathermap' ? 'Get your free key at openweathermap.org/api' :
@@ -3617,18 +3562,18 @@
                     <div class="settings-row">
                         <label>Use device location</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.useGeolocation ? 'checked' : ''} data-setting="useGeolocation">
+                            <input type="checkbox" ${AppState.settings.useGeolocation ? 'checked' : ''} onchange="updateSetting('useGeolocation', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Manual location</label>
-                        <input type="text" class="settings-input" value="${AppState.settings.weatherLocation}" data-setting="weatherLocation" placeholder="City name or ZIP code">
+                        <input type="text" class="settings-input" value="${AppState.settings.weatherLocation}" onchange="updateSetting('weatherLocation', this.value)" placeholder="City name or ZIP code">
                         <small>Used as fallback when geolocation is disabled or fails</small>
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Temperature unit</label>
-                        <select class="settings-input" data-setting="weatherUnit">
+                        <select class="settings-input" onchange="updateSetting('weatherUnit', this.value)">
                             <option value="metric" ${AppState.settings.weatherUnit === 'metric' ? 'selected' : ''}>Celsius</option>
                             <option value="imperial" ${AppState.settings.weatherUnit === 'imperial' ? 'selected' : ''}>Fahrenheit</option>
                         </select>
@@ -3636,21 +3581,9 @@
                 </div>
                 
                 <div class="settings-section">
-                    <h3>Security</h3>
-                    <div class="settings-row">
-                        <label>Persist API keys (less secure)</label>
-                        <label class="switch">
-                            <input type="checkbox" ${AppState.settings.persistApiKeys ? 'checked' : ''} data-setting="persistApiKeys">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <small>When disabled, API keys are stored only in memory and must be re-entered each session for better security.</small>
-                </div>
-                
-                <div class="settings-section">
                     <h3>Actions</h3>
-                    <button class="btn btn-primary" data-action="testWeatherConnection">Test Connection</button>
-                    <button class="btn btn-secondary" data-action="refreshWeather">Refresh Weather</button>
+                    <button class="btn btn-primary" onclick="testWeatherConnection()">Test Connection</button>
+                    <button class="btn btn-secondary" onclick="refreshWeather()">Refresh Weather</button>
                 </div>
             `;
         }
@@ -3679,7 +3612,7 @@
                     <h3>Search Commands</h3>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
                         <p style="margin: 0; color: var(--text-secondary); font-size: var(--font-size-sm);">Customize your search shortcuts</p>
-                        <button class="btn btn-primary" data-action="openCommandModal">
+                        <button class="btn btn-primary" onclick="openCommandModal()">
                             <i data-lucide="plus" aria-hidden="true"></i>
                             Add Command
                         </button>
@@ -3698,7 +3631,7 @@
                                         <div class="command-url">${sanitizeHTML(info.url)}</div>
                                     </div>
                                     <div class="command-actions">
-                                        <button class="tile-control" data-action="openCommandModal" data-command="${shortcut}" title="Edit command">
+                                        <button class="tile-control" onclick="openCommandModal('${shortcut}')" title="Edit command">
                                             <i data-lucide="edit" aria-hidden="true"></i>
                                         </button>
                                     </div>
@@ -3718,7 +3651,9 @@
             `;
             
             // Initialize Lucide icons
-            refreshIconsIn(container);
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
         
         function renderDataSettings(container) {
@@ -3726,7 +3661,7 @@
                 <div class="settings-section">
                     <h3>Data Management</h3>
                     <div class="settings-group">
-                        <button class="btn btn-primary" data-action="exportData">
+                        <button class="btn btn-primary" onclick="exportData()">
                             <i data-lucide="download" aria-hidden="true"></i>
                             Export Settings
                         </button>
@@ -3734,7 +3669,7 @@
                     </div>
                     <div class="settings-group">
                         <label class="settings-label">Import Settings</label>
-                        <input type="file" accept=".json" data-action="importData" class="settings-input">
+                        <input type="file" accept=".json" onchange="importData(this)" class="settings-input">
                         <small>Upload a previously exported JSON file</small>
                     </div>
                 </div>
@@ -3744,14 +3679,14 @@
                     <div class="settings-row">
                         <label>Privacy mode (hide personal widgets)</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.privacyMode ? 'checked' : ''} data-setting="privacyMode">
+                            <input type="checkbox" ${AppState.settings.privacyMode ? 'checked' : ''} onchange="updateSetting('privacyMode', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="settings-row">
                         <label>Enable notifications</label>
                         <label class="switch">
-                            <input type="checkbox" ${AppState.settings.enableNotifications ? 'checked' : ''} data-setting="enableNotifications">
+                            <input type="checkbox" ${AppState.settings.enableNotifications ? 'checked' : ''} onchange="updateSetting('enableNotifications', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -3760,7 +3695,7 @@
                 <div class="settings-section">
                     <h3>Reset</h3>
                     <div class="settings-group">
-                        <button class="btn btn-secondary" data-action="resetAllData">
+                        <button class="btn btn-secondary" onclick="resetAllData()">
                             <i data-lucide="trash-2" aria-hidden="true"></i>
                             Reset All Data
                         </button>
@@ -3771,7 +3706,7 @@
                 <div class="settings-section">
                     <h3>System Test</h3>
                     <div class="settings-group">
-                        <button class="btn btn-secondary" data-action="runSystemTest">
+                        <button class="btn btn-secondary" onclick="runSystemTest()">
                             <i data-lucide="activity" aria-hidden="true"></i>
                             Run Self-Test
                         </button>
@@ -3782,7 +3717,9 @@
             `;
             
             // Initialize Lucide icons
-            refreshIconsIn(container);
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
         
         function updateSetting(key, value) {
@@ -3881,19 +3818,11 @@
                         throw new Error('Invalid backup file format');
                     }
                     
-                    // SECURITY: Sanitize imported data
-                    const sanitizedSettings = Object.create(null);
-                    Object.entries(data.settings).forEach(([key, value]) => {
-                        if (DefaultSettings.hasOwnProperty(key)) {
-                            sanitizedSettings[key] = value;
-                        }
-                    });
-                    
                     // Import data
                     AppState.settings = { 
                         ...DefaultSettings, 
-                        ...sanitizedSettings,
-                        searchCommands: { ...DefaultSearchCommands, ...(sanitizedSettings.searchCommands || {}) }
+                        ...data.settings,
+                        searchCommands: { ...DefaultSearchCommands, ...(data.settings.searchCommands || {}) }
                     };
                     AppState.tiles = data.tiles || [];
                     AppState.notes = { ...AppState.notes, ...data.notes };
@@ -4155,20 +4084,11 @@
         // UTILITY FUNCTIONS
         // ============================================================================
         
-        // SECURITY: Safe clipboard with error handling
         function copyToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(text).catch(() => {
-                    // Fallback silently
-                    fallbackCopyToClipboard(text);
-                });
+                return navigator.clipboard.writeText(text);
             } else {
-                return fallbackCopyToClipboard(text);
-            }
-        }
-        
-        function fallbackCopyToClipboard(text) {
-            try {
+                // Fallback for older browsers
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 textarea.style.position = 'fixed';
@@ -4178,8 +4098,6 @@
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
                 return Promise.resolve();
-            } catch (error) {
-                return Promise.reject(error);
             }
         }
         
@@ -4244,135 +4162,6 @@
         }
         
         // ============================================================================
-        // EVENT DELEGATION (SECURITY: No inline handlers)
-        // ============================================================================
-        
-        function initializeEventDelegation() {
-            document.addEventListener('click', (e) => {
-                const action = e.target.closest('[data-action]')?.getAttribute('data-action');
-                if (!action) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const element = e.target.closest('[data-action]');
-                
-                switch (action) {
-                    case 'toggleTheme':
-                        toggleTheme();
-                        break;
-                    case 'togglePrivacyMode':
-                        togglePrivacyMode();
-                        break;
-                    case 'openSettings':
-                        openSettings();
-                        break;
-                    case 'closeSettings':
-                        closeSettings();
-                        break;
-                    case 'switchSettingsTab':
-                        switchSettingsTab(element.getAttribute('data-tab'));
-                        break;
-                    case 'refreshWeather':
-                        refreshWeather();
-                        break;
-                    case 'addTile':
-                        addTile();
-                        break;
-                    case 'editTile':
-                        editTile(element.getAttribute('data-tile-id'));
-                        break;
-                    case 'closeTileModal':
-                        closeTileModal();
-                        break;
-                    case 'saveTile':
-                        saveTile();
-                        break;
-                    case 'deleteTile':
-                        deleteTile();
-                        break;
-                    case 'openCommandModal':
-                        openCommandModal(element.getAttribute('data-command'));
-                        break;
-                    case 'closeCommandModal':
-                        closeCommandModal();
-                        break;
-                    case 'saveCommand':
-                        saveCommand();
-                        break;
-                    case 'deleteCommand':
-                        deleteCommand();
-                        break;
-                    case 'startTimer':
-                        startTimer();
-                        break;
-                    case 'pauseTimer':
-                        pauseTimer();
-                        break;
-                    case 'resetTimer':
-                        resetTimer();
-                        break;
-                    case 'switchNotesTab':
-                        switchNotesTab(element.getAttribute('data-tab'));
-                        break;
-                    case 'copyTemplate':
-                        copyTemplate(parseInt(element.getAttribute('data-index')));
-                        break;
-                    case 'editTemplate':
-                        editTemplate(parseInt(element.getAttribute('data-index')));
-                        break;
-                    case 'deleteTemplate':
-                        deleteTemplate(parseInt(element.getAttribute('data-index')));
-                        break;
-                    case 'addTemplate':
-                        addTemplate();
-                        break;
-                    case 'selectSuggestion':
-                        selectSuggestion(parseInt(element.getAttribute('data-index')));
-                        break;
-                    case 'testWeatherConnection':
-                        testWeatherConnection();
-                        break;
-                    case 'exportData':
-                        exportData();
-                        break;
-                    case 'resetAllData':
-                        resetAllData();
-                        break;
-                    case 'runSystemTest':
-                        runSystemTest();
-                        break;
-                }
-            });
-            
-            // Settings change handler
-            document.addEventListener('change', (e) => {
-                const setting = e.target.getAttribute('data-setting');
-                if (!setting) return;
-                
-                let value;
-                if (e.target.type === 'checkbox') {
-                    value = e.target.checked;
-                } else if (e.target.type === 'number') {
-                    value = parseInt(e.target.value) || 0;
-                } else if (e.target.type === 'range') {
-                    value = parseFloat(e.target.value);
-                } else {
-                    value = e.target.value;
-                }
-                
-                updateSetting(setting, value);
-            });
-            
-            // File input handler
-            document.addEventListener('change', (e) => {
-                if (e.target.getAttribute('data-action') === 'importData') {
-                    importData(e.target);
-                }
-            });
-        }
-        
-        // ============================================================================
         // KEYBOARD SHORTCUTS
         // ============================================================================
         
@@ -4426,7 +4215,7 @@
         }
         
         // ============================================================================
-        // SERVICE WORKER (IMPROVED)
+        // SERVICE WORKER
         // ============================================================================
         
         function registerServiceWorker() {
@@ -4434,24 +4223,9 @@
             if (location.protocol === 'file:') return; // Skip in file mode
             
             const swCode = `
-                const CACHE = 'smart-newtab-v2';
-                const MAX_ENTRIES = 60;
-                
+                const CACHE = 'smart-newtab-v1';
                 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-                
-                self.addEventListener('activate', e => e.waitUntil(
-                    caches.keys().then(keys => 
-                        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-                    ).then(() => self.clients.claim())
-                ));
-                
-                async function putWithCap(request, response) {
-                    const cache = await caches.open(CACHE);
-                    const keys = await cache.keys();
-                    if (keys.length >= MAX_ENTRIES) await cache.delete(keys[0]);
-                    await cache.put(request, response);
-                }
-                
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
                 self.addEventListener('fetch', e => {
                     if (e.request.method !== 'GET') return;
                     const url = new URL(e.request.url);
@@ -4461,7 +4235,7 @@
                             cached || fetch(e.request).then(resp => {
                                 if (!resp || resp.status !== 200 || resp.type !== 'basic') return resp;
                                 const copy = resp.clone();
-                                putWithCap(e.request, copy);
+                                caches.open(CACHE).then(c => c.put(e.request, copy));
                                 return resp;
                             })
                         )
@@ -4500,7 +4274,6 @@
             initializeSearch();
             initializeNotes();
             initializeKeyboardShortcuts();
-            initializeEventDelegation();
             
             // Render UI
             renderTiles();
@@ -4558,7 +4331,7 @@
                 }
             });
             
-            // Initialize Lucide icons once
+            // Initialize Lucide icons
             if (window.lucide) {
                 lucide.createIcons();
             }
@@ -4570,6 +4343,44 @@
         } else {
             initialize();
         }
+        
+        // ============================================================================
+        // GLOBAL FUNCTIONS (called by HTML event handlers)
+        // ============================================================================
+        
+        // Expose functions to global scope for HTML event handlers
+        window.toggleTheme = toggleTheme;
+        window.togglePrivacyMode = togglePrivacyMode;
+        window.openSettings = openSettings;
+        window.closeSettings = closeSettings;
+        window.switchSettingsTab = switchSettingsTab;
+        window.updateSetting = updateSetting;
+        window.testWeatherConnection = testWeatherConnection;
+        window.exportData = exportData;
+        window.importData = importData;
+        window.resetAllData = resetAllData;
+        window.runSystemTest = runSystemTest;
+        window.refreshWeather = refreshWeather;
+        window.addTile = addTile;
+        window.editTile = editTile;
+        window.openTileModal = openTileModal;
+        window.closeTileModal = closeTileModal;
+        window.saveTile = saveTile;
+        window.deleteTile = deleteTile;
+        window.openCommandModal = openCommandModal;
+        window.closeCommandModal = closeCommandModal;
+        window.saveCommand = saveCommand;
+        window.deleteCommand = deleteCommand;
+        window.startTimer = startTimer;
+        window.pauseTimer = pauseTimer;
+        window.resetTimer = resetTimer;
+        window.switchNotesTab = switchNotesTab;
+        window.copyTemplate = copyTemplate;
+        window.editTemplate = editTemplate;
+        window.deleteTemplate = deleteTemplate;
+        window.addTemplate = addTemplate;
+        window.selectSuggestion = selectSuggestion;
+        
     </script>
 </body>
 </html>
