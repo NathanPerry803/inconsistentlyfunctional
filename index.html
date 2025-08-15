@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart New Tab</title>
@@ -1038,27 +1036,6 @@
             max-width: 400px;
         }
         
-        /* Weather error styles */
-        .weather-error {
-            color: #dc3545;
-            background: rgba(220, 53, 69, 0.1);
-            padding: var(--space-md);
-            border-radius: 8px;
-            font-size: var(--font-size-sm);
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-        
-        .weather-debug {
-            margin-top: var(--space-sm);
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-            font-family: monospace;
-            background: var(--bg-tertiary);
-            padding: var(--space-sm);
-            border-radius: 4px;
-            white-space: pre-wrap;
-        }
-        
         /* Responsive */
         @media (max-width: 1024px) {
             .container {
@@ -1199,16 +1176,7 @@
         <main class="main-content">
             <!-- Search -->
             <section class="search-section">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    class="search-input" 
-                    placeholder="Search or type a command (/ for help)..."
-                    aria-label="Universal search input"
-                    aria-describedby="searchHelp"
-                    autocomplete="off"
-                    spellcheck="false"
-                >
+                <input type="text" id="searchInput" class="search-input" placeholder="Search or type a command (/ for help)..." aria-label="Universal search input" aria-describedby="searchHelp" autocomplete="off" spellcheck="false">
                 <div id="searchSuggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
                 <div id="searchHelp" class="sr-only">
                     Type to search or use commands like /g for Google, /ddg for DuckDuckGo, /yt for YouTube, /gh for GitHub, /gpt for ChatGPT
@@ -1278,7 +1246,7 @@
             <section class="sidebar-section" id="notesSection">
                 <h3 class="sidebar-title">
                     <i data-lucide="file-text" aria-hidden="true"></i>
-                    Notes & Goals
+                    Notes &amp; Goals
                 </h3>
                 <div class="notes-tabs" role="tablist">
                     <button class="notes-tab active" onclick="switchNotesTab(event, 'notes')" aria-label="Switch to notes" role="tab" aria-selected="true">
@@ -1292,12 +1260,7 @@
                     </button>
                 </div>
                 <div id="notesContent" class="notes-content">
-                    <textarea 
-                        id="notesTextarea" 
-                        class="notes-textarea" 
-                        placeholder="Write your notes here... (Supports Markdown)"
-                        aria-label="Notes textarea"
-                    ></textarea>
+                    <textarea id="notesTextarea" class="notes-textarea" placeholder="Write your notes here... (Supports Markdown)" aria-label="Notes textarea"></textarea>
                 </div>
             </section>
         </aside>
@@ -1343,11 +1306,11 @@
                 <form id="tileForm">
                     <div class="settings-group">
                         <label class="settings-label" for="tileTitle">Title</label>
-                        <input type="text" id="tileTitle" class="settings-input" required>
+                        <input type="text" id="tileTitle" class="settings-input" required="">
                     </div>
                     <div class="settings-group">
                         <label class="settings-label" for="tileUrl">URL</label>
-                        <input type="url" id="tileUrl" class="settings-input" required>
+                        <input type="url" id="tileUrl" class="settings-input" required="">
                     </div>
                     <div class="settings-group">
                         <label class="settings-label" for="tileIcon">Icon (Emoji or Lucide icon name)</label>
@@ -1384,16 +1347,16 @@
                 <form id="commandForm">
                     <div class="settings-group">
                         <label class="settings-label" for="commandShortcut">Shortcut</label>
-                        <input type="text" id="commandShortcut" class="settings-input" placeholder="/gpt" required>
+                        <input type="text" id="commandShortcut" class="settings-input" placeholder="/gpt" required="">
                         <small>Must start with "/" and contain no spaces</small>
                     </div>
                     <div class="settings-group">
                         <label class="settings-label" for="commandName">Name</label>
-                        <input type="text" id="commandName" class="settings-input" placeholder="ChatGPT" required>
+                        <input type="text" id="commandName" class="settings-input" placeholder="ChatGPT" required="">
                     </div>
                     <div class="settings-group">
                         <label class="settings-label" for="commandUrl">URL Template</label>
-                        <input type="url" id="commandUrl" class="settings-input" placeholder="https://chat.openai.com/" required>
+                        <input type="url" id="commandUrl" class="settings-input" placeholder="https://chat.openai.com/" required="">
                         <small>Use {query} placeholder for search terms (optional)</small>
                     </div>
                     <div class="settings-group">
@@ -1484,13 +1447,13 @@
             '/yt': { name: 'YouTube', url: 'https://www.youtube.com/results?search_query={query}', icon: 'youtube' },
             '/gh': { name: 'GitHub', url: 'https://github.com/search?q={query}', icon: 'github' },
             '/mdn': { name: 'MDN', url: 'https://developer.mozilla.org/en-US/search?q={query}', icon: 'book' },
-            '/so': { name: 'Stack Overflow', url: 'https://stackoverflow.com/search?q={query}', icon: 'help-circle' },
+            '/so': { name: 'Stack Overflow', url: 'https://stackoverflow.com/search?q={query}', icon: 'stack-overflow' },
             '/gpt': { name: 'ChatGPT', url: 'https://chat.openai.com/', icon: 'bot', copyQuery: true },
             '/cd': { name: 'Claude', url: 'https://claude.ai/', icon: 'zap', copyQuery: true },
             '/pt': { name: 'PromptoTron', url: 'https://poe.com/PromptTemplateBot', icon: 'sparkles', copyQuery: true },
             '/w': { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Special:Search?search={query}', icon: 'book-open' },
             '/amz': { name: 'Amazon', url: 'https://www.amazon.com/s?k={query}', icon: 'package' },
-            '/hn': { name: 'Hacker News', url: 'https://hn.algolia.com/?q={query}', icon: 'newspaper' },
+            '/hn': { name: 'Hacker News', url: 'https://hn.algolia.com/?q={query}', icon: 'news' },
             '/red': { name: 'Reddit', url: 'https://www.reddit.com/search/?q={query}', icon: 'message-circle' },
             '/tw': { name: 'Twitter', url: 'https://twitter.com/search?q={query}', icon: 'twitter' },
             '/li': { name: 'LinkedIn', url: 'https://www.linkedin.com/search/results/all/?keywords={query}', icon: 'linkedin' }
@@ -1530,11 +1493,23 @@
         
         // Default prompt templates
         const DefaultTemplates = [
-            { name: 'Code Review', template: 'Please review this code for:\n- Performance issues\n- Security vulnerabilities\n- Best practices\n- Potential bugs\n\nCode:\n```\n[PASTE CODE HERE]\n```' },
-            { name: 'Explain Code', template: 'Please explain this code step by step:\n\n```\n[PASTE CODE HERE]\n```\n\nFocus on:\n- What it does\n- How it works\n- Key concepts used' },
-            { name: 'Debug Help', template: 'I\'m having an issue with this code:\n\n```\n[PASTE CODE HERE]\n```\n\nError message:\n```\n[PASTE ERROR HERE]\n```\n\nExpected behavior: [DESCRIBE EXPECTED BEHAVIOR]\nActual behavior: [DESCRIBE ACTUAL BEHAVIOR]' },
-            { name: 'Optimize Code', template: 'Please help optimize this code for:\n- Performance\n- Readability\n- Memory usage\n\nCode:\n```\n[PASTE CODE HERE]\n```' },
-            { name: 'Write Tests', template: 'Please write comprehensive tests for this function:\n\n```\n[PASTE CODE HERE]\n```\n\nInclude:\n- Unit tests\n- Edge cases\n- Error scenarios' }
+            { name: 'Code Review', template: 'Please review this code for:\n- Performance issues\n- Security vulnerabilities\n- Best practices\n- Potential bugs\n\nCode:\n
+\n[PASTE CODE HERE]\n
+' },
+            { name: 'Explain Code', template: 'Please explain this code step by step:\n\n
+\n[PASTE CODE HERE]\n
+\n\nFocus on:\n- What it does\n- How it works\n- Key concepts used' },
+            { name: 'Debug Help', template: 'I\'m having an issue with this code:\n\n
+\n[PASTE CODE HERE]\n
+\n\nError message:\n
+\n[PASTE ERROR HERE]\n
+\n\nExpected behavior: [DESCRIBE EXPECTED BEHAVIOR]\nActual behavior: [DESCRIBE ACTUAL BEHAVIOR]' },
+            { name: 'Optimize Code', template: 'Please help optimize this code for:\n- Performance\n- Readability\n- Memory usage\n\nCode:\n
+\n[PASTE CODE HERE]\n
+' },
+            { name: 'Write Tests', template: 'Please write comprehensive tests for this function:\n\n
+\n[PASTE CODE HERE]\n
+\n\nInclude:\n- Unit tests\n- Edge cases\n- Error scenarios' }
         ];
         
         // ============================================================================
@@ -1784,13 +1759,13 @@
             }
         }
         
-        // FIXED: Simplified theme toggle - light -> dark -> auto
         function toggleTheme() {
             const currentTheme = AppState.settings.theme;
             let newTheme;
             
             if (currentTheme === 'auto') {
-                newTheme = 'light';
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                newTheme = prefersDark ? 'light' : 'dark';
             } else if (currentTheme === 'light') {
                 newTheme = 'dark';
             } else {
@@ -1952,7 +1927,7 @@
                 }
                 
                 if (!coords) {
-                    throw new Error('No location available. Please enable geolocation or set a manual location in settings.');
+                    throw new Error('No location available');
                 }
                 
                 // Check cache
@@ -1997,7 +1972,7 @@
             
             async fetchOpenWeatherMap(coords, apiKey) {
                 if (!apiKey) {
-                    throw new Error('OpenWeatherMap API key required. Get one free at openweathermap.org/api');
+                    throw new Error('OpenWeatherMap API key required');
                 }
                 
                 const unit = AppState.settings.weatherUnit === 'metric' ? 'metric' : 'imperial';
@@ -2008,8 +1983,6 @@
                 } else {
                     url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(coords.query)}&appid=${apiKey}&units=${unit}`;
                 }
-                
-                console.log('Weather API URL:', url.replace(apiKey, 'HIDDEN_API_KEY'));
                 
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -2025,18 +1998,12 @@
                     clearTimeout(timeoutId);
                     
                     if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('Weather API error response:', errorText);
-                        throw new Error(`Weather API error (${response.status}): ${errorText}`);
+                        throw new Error(`Weather API error: ${response.status}`);
                     }
                     
                     const data = await response.json();
-                    console.log('Weather API response:', data);
                     
                     return this.normalizeWeatherData(data, 'openweathermap');
-                } catch (error) {
-                    console.error('Weather fetch error:', error);
-                    throw error;
                 } finally {
                     clearTimeout(timeoutId);
                 }
@@ -2045,7 +2012,7 @@
             async fetchWeatherGov(coords) {
                 // Weather.gov only works for US locations and requires lat/lon
                 if (!coords.lat || !coords.lon) {
-                    throw new Error('Weather.gov requires coordinates. Please enable geolocation or use another provider.');
+                    throw new Error('Weather.gov requires coordinates');
                 }
                 
                 const controller = new AbortController();
@@ -2125,10 +2092,10 @@
                             temp: data.main.temp,
                             condition: data.weather[0].description,
                             humidity: data.main.humidity,
-                            windSpeed: data.wind?.speed || 0,
+                            windSpeed: data.wind.speed,
                             icon: this.getWeatherIcon(data.weather[0].icon, provider)
                         };
-                        normalized.location = data.name + (data.sys?.country ? `, ${data.sys.country}` : '');
+                        normalized.location = data.name;
                         break;
                         
                     case 'weathergov': {
@@ -2291,24 +2258,10 @@
                 
             } catch (error) {
                 console.error('Weather fetch failed:', error);
-                
-                // Enhanced error display with debug info
-                const { weatherProvider, weatherApiKey, weatherLocation, useGeolocation } = AppState.settings;
-                
-                let debugInfo = `Provider: ${weatherProvider}\n`;
-                debugInfo += `API Key: ${weatherApiKey ? '[SET]' : '[NOT SET]'}\n`;
-                debugInfo += `Geolocation: ${useGeolocation ? 'enabled' : 'disabled'}\n`;
-                debugInfo += `Manual Location: ${weatherLocation || '[NOT SET]'}\n`;
-                debugInfo += `Error: ${error.message}`;
-                
                 weatherContent.innerHTML = `
-                    <div class="weather-error">
-                        <strong>Weather Unavailable</strong><br>
-                        ${error.message}
-                        <div class="weather-debug">${debugInfo}</div>
-                        <div style="margin-top: var(--space-sm);">
-                            <small>Check settings → Weather to configure API key and location.</small>
-                        </div>
+                    <div class="error">
+                        Weather unavailable: ${error.message}
+                        <br><small>Check your API key and location settings.</small>
                     </div>
                 `;
             }
@@ -3153,30 +3106,26 @@
         // ============================================================================
         
         function initializeNotes() {
+            const textarea = document.getElementById('notesTextarea');
+            if (!textarea) return;
+            
+            // Load current notes content
             updateNotesContent();
             
-            // Auto-save notes when switching tabs or typing
+            // Auto-save notes
             const debouncedSave = debounce(() => {
-                const textarea = document.getElementById('notesTextarea');
-                if (textarea && textarea.style.display !== 'none' && AppState.notes.current !== 'templates') {
-                    AppState.notes[AppState.notes.current] = textarea.value;
-                    saveNotes();
-                }
+                const content = textarea.value;
+                AppState.notes[AppState.notes.current] = content;
+                saveNotes();
             }, 500);
             
-            // Use event delegation since textarea might be recreated
-            document.addEventListener('input', (e) => {
-                if (e.target.id === 'notesTextarea') {
-                    debouncedSave();
-                }
-            });
+            textarea.addEventListener('input', debouncedSave);
         }
         
-        // FIXED: Better tab switching that preserves textarea properly
         function switchNotesTab(e, tab) {
-            // Save current content ONLY if we have a textarea and it's visible
+            // Save current content
             const textarea = document.getElementById('notesTextarea');
-            if (textarea && textarea.style.display !== 'none' && AppState.notes.current !== 'templates') {
+            if (textarea && AppState.notes.current) {
                 AppState.notes[AppState.notes.current] = textarea.value;
                 saveNotes();
             }
@@ -3207,41 +3156,26 @@
         }
         
         function updateNotesContent() {
+            const textarea = document.getElementById('notesTextarea');
             const notesContent = document.getElementById('notesContent');
-            if (!notesContent) return;
-            
-            // Clear content first
-            notesContent.innerHTML = '';
+            if (!textarea || !notesContent) return;
             
             switch (AppState.notes.current) {
                 case 'notes':
-                    notesContent.innerHTML = `
-                        <textarea 
-                            id="notesTextarea" 
-                            class="notes-textarea" 
-                            placeholder="Write your notes here... (Supports Markdown)"
-                            aria-label="Notes textarea"
-                        >${AppState.notes.notes || ''}</textarea>
-                    `;
+                    textarea.value = AppState.notes.notes || '';
+                    textarea.placeholder = 'Write your notes here... (Supports Markdown)';
+                    textarea.style.display = 'block';
                     break;
                     
                 case 'goals':
-                    notesContent.innerHTML = `
-                        <textarea 
-                            id="notesTextarea" 
-                            class="notes-textarea" 
-                            placeholder="List your daily goals here...
-
-- [ ] Goal 1
-- [ ] Goal 2  
-- [x] Completed goal"
-                            aria-label="Goals textarea"
-                        >${AppState.notes.goals || ''}</textarea>
-                    `;
+                    textarea.value = AppState.notes.goals || '';
+                    textarea.placeholder = 'List your daily goals here...\n\n- [ ] Goal 1\n- [ ] Goal 2\n- [x] Completed goal';
+                    textarea.style.display = 'block';
                     break;
                     
                 case 'templates':
                     renderTemplates();
+                    textarea.style.display = 'none';
                     break;
             }
         }
@@ -3740,7 +3674,7 @@
                     updateGreeting();
                     break;
                 case 'privacyMode':
-                    applyPrivacyMode();
+                    applyPrivacyMode(); // Fixed: was calling togglePrivacyMode
                     break;
                 case 'fontScale':
                     document.documentElement.style.setProperty('--font-size-base', `${value}rem`);
@@ -4382,5 +4316,6 @@
         window.selectSuggestion = selectSuggestion;
         
     </script>
-</body>
-</html>
+
+
+</body></html>
