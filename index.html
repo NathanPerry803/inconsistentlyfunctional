@@ -1,0 +1,4386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart New Tab</title>
+    <meta name="description" content="Interactive smart homepage for Chrome new tab">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235D5CDE' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- 
+    ============================================================================
+    SMART NEW TAB HOMEPAGE - Getting Started Guide
+    ============================================================================
+    
+    HOW TO SET AS CHROME NEW TAB:
+    1. Save this file to your computer (e.g., smart-newtab.html)
+    2. Open Chrome Settings (chrome://settings/)
+    3. Go to "On startup" section
+    4. Select "Open a specific page or set of pages"
+    5. Click "Add a new page" and enter: file:///path/to/smart-newtab.html
+    6. For new tab: Use an extension like "New Tab Redirect" or "Custom New Tab URL"
+    
+    WEATHER SETUP:
+    1. Click the settings gear icon (top right)
+    2. Go to "Weather" tab
+    3. Choose a provider (OpenWeatherMap recommended for free tier)
+    4. Get API key from:
+       - OpenWeatherMap: https://openweathermap.org/api
+       - Weather.gov: No key needed (US only)
+       - Tomorrow.io: https://www.tomorrow.io/weather-api/
+    5. Enable location permission when prompted
+    
+    CUSTOMIZATION:
+    - Add/edit tiles: Hover over tiles and click edit icon
+    - Drag tiles to reorder
+    - Use keyboard shortcuts: / for search, n for new tile, t for theme toggle
+    - Customize search commands in Settings > Shortcuts
+    - Access all settings via gear icon
+    
+    FEATURES:
+    ✓ Real-time clock with timezone detection
+    ✓ Weather with multiple provider support
+    ✓ Drag-drop customizable quick links
+    ✓ Universal search with customizable slash commands
+    ✓ Pomodoro timer and productivity tools
+    ✓ Daily goals and markdown notes
+    ✓ AI prompt templates
+    ✓ Full keyboard navigation
+    ✓ Light/dark theme with custom accents
+    ✓ Lucide icons with emoji fallback
+    ✓ Offline support with service worker
+    ✓ Privacy mode for screen sharing
+    
+    ============================================================================
+    -->
+    
+    <style>
+        :root {
+            /* Color system */
+            --primary: #5D5CDE;
+            --primary-light: #7C7CE8;
+            --primary-dark: #4A49C7;
+            --accent: var(--primary);
+            
+            /* Light theme */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8F9FA;
+            --bg-tertiary: #E9ECEF;
+            --text-primary: #212529;
+            --text-secondary: #6C757D;
+            --text-muted: #ADB5BD;
+            --border: #DEE2E6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            
+            /* Typography */
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            
+            /* Animations */
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --animation-scale: 1.02;
+        }
+        
+        /* Dark theme */
+        [data-theme="dark"] {
+            --bg-primary: #181818;
+            --bg-secondary: #242424;
+            --bg-tertiary: #2F2F2F;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --text-muted: #8A8A8A;
+            --border: #404040;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Auto dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-primary: #181818;
+                --bg-secondary: #242424;
+                --bg-tertiary: #2F2F2F;
+                --text-primary: #FFFFFF;
+                --text-secondary: #B3B3B3;
+                --text-muted: #8A8A8A;
+                --border: #404040;
+                --shadow: rgba(0, 0, 0, 0.3);
+                --shadow-hover: rgba(0, 0, 0, 0.4);
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            :root {
+                --transition: none;
+                --animation-scale: 1;
+            }
+            
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: var(--transition);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Visually hidden but accessible */
+        .sr-only {
+            position: absolute !important;
+            width: 1px; 
+            height: 1px;
+            padding: 0; 
+            margin: -1px;
+            overflow: hidden; 
+            clip: rect(0 0 1px 1px);
+            white-space: nowrap; 
+            border: 0;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            margin: 0 0 var(--space-md) 0;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+        
+        p {
+            margin: 0 0 var(--space-md) 0;
+        }
+        
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        input, textarea {
+            font-family: inherit;
+            font-size: var(--font-size-base);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.1);
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-xl);
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xl);
+        }
+        
+        .sidebar {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .time-section {
+            flex: 1;
+        }
+        
+        .current-time {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .current-date {
+            font-size: var(--font-size-lg);
+            color: var(--text-secondary);
+        }
+        
+        .greeting {
+            font-size: var(--font-size-xl);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+            min-height: 1.5em;
+        }
+        
+        .controls {
+            display: flex;
+            gap: var(--space-sm);
+            align-items: flex-start;
+        }
+        
+        .icon-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        
+        .icon-button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: scale(var(--animation-scale));
+        }
+        
+        .icon-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.1);
+        }
+        
+        .icon-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Search */
+        .search-section {
+            position: relative;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: var(--space-lg);
+            font-size: var(--font-size-lg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            border-color: var(--accent);
+            background: var(--bg-primary);
+            box-shadow: 0 8px 32px var(--shadow);
+        }
+        
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-top: var(--space-xs);
+            box-shadow: 0 8px 32px var(--shadow);
+            z-index: 100;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-suggestion {
+            padding: var(--space-md);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .search-suggestion:last-child {
+            border-bottom: none;
+        }
+        
+        .search-suggestion:hover,
+        .search-suggestion.active {
+            background: var(--bg-secondary);
+        }
+        
+        .search-suggestion-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-suggestion-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Quick Links */
+        .quick-links {
+            flex: 1;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .section-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+        }
+        
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            min-height: 200px;
+        }
+        
+        .tile {
+            position: relative;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 140px;
+            justify-content: center;
+        }
+        
+        .tile:hover {
+            transform: translateY(-4px) scale(var(--animation-scale));
+            box-shadow: 0 8px 32px var(--shadow-hover);
+            border-color: var(--accent);
+        }
+        
+        .tile:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.1);
+        }
+        
+        .tile.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+        
+        .tile-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--space-sm);
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tile-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .tile-title {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .tile-url {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        
+        .tile-controls {
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            display: flex;
+            gap: var(--space-xs);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .tile:hover .tile-controls {
+            opacity: 1;
+        }
+        
+        .tile-control {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xs);
+            border: 1px solid var(--border);
+        }
+        
+        .tile-control svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .add-tile {
+            border: 2px dashed var(--border);
+            background: transparent;
+            color: var(--text-muted);
+        }
+        
+        .add-tile:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(93, 92, 222, 0.05);
+        }
+        
+        /* Sidebar */
+        .sidebar-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: var(--space-lg);
+        }
+        
+        .sidebar-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .sidebar-title svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Weather */
+        .weather-current {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .weather-icon {
+            font-size: var(--font-size-3xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .weather-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .weather-info {
+            flex: 1;
+        }
+        
+        .weather-temp {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .weather-desc {
+            color: var(--text-secondary);
+            text-transform: capitalize;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-sm);
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+        
+        .weather-forecast {
+            margin-top: var(--space-lg);
+        }
+        
+        .forecast-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .forecast-item:last-child {
+            border-bottom: none;
+        }
+        
+        .forecast-time {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+        
+        .forecast-icon {
+            font-size: var(--font-size-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .forecast-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .forecast-temp {
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        /* Timer */
+        .timer-display {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .timer-time {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .timer-label {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .timer-button {
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 8px;
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .timer-button:hover {
+            background: var(--primary-dark);
+            transform: scale(var(--animation-scale));
+        }
+        
+        .timer-button.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .timer-button.secondary:hover {
+            background: var(--border);
+        }
+        
+        .timer-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .timer-stats {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        
+        /* Notes */
+        .notes-tabs {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            role: tablist;
+        }
+        
+        .notes-tab {
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            transition: var(--transition);
+            role: tab;
+        }
+        
+        .notes-tab.active {
+            background: var(--accent);
+            color: white;
+            aria-selected: true;
+        }
+        
+        .notes-content {
+            height: 200px;
+        }
+        
+        .notes-textarea {
+            width: 100%;
+            height: 100%;
+            resize: none;
+            border: none;
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: 8px;
+        }
+        
+        .notes-preview {
+            height: 100%;
+            padding: var(--space-md);
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow-y: auto;
+            font-size: var(--font-size-sm);
+            line-height: 1.6;
+        }
+        
+        .notes-preview h1, .notes-preview h2, .notes-preview h3 {
+            margin-top: 0;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .notes-preview ul, .notes-preview ol {
+            padding-left: var(--space-lg);
+        }
+        
+        .notes-preview code {
+            background: var(--bg-tertiary);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            max-width: 600px;
+            max-height: 80vh;
+            width: 90%;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: var(--transition);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .modal-body {
+            padding: var(--space-lg);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+        }
+        
+        /* Settings */
+        .settings-tabs {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--border);
+            role: tablist;
+        }
+        
+        .settings-tab {
+            padding: var(--space-sm) var(--space-md);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: var(--transition);
+            role: tab;
+        }
+        
+        .settings-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            aria-selected: true;
+        }
+        
+        .settings-section {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .settings-group {
+            margin-bottom: var(--space-lg);
+        }
+        
+        .settings-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .settings-input {
+            width: 100%;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) 0;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: var(--transition);
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* Command Editor */
+        .command-list {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .command-item {
+            display: flex;
+            align-items: center;
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--border);
+            gap: var(--space-sm);
+        }
+        
+        .command-item:last-child {
+            border-bottom: none;
+        }
+        
+        .command-shortcut {
+            font-family: monospace;
+            background: var(--bg-tertiary);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 4px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .command-info {
+            flex: 1;
+        }
+        
+        .command-name {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .command-url {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+        
+        .command-actions {
+            display: flex;
+            gap: var(--space-xs);
+        }
+        
+        /* Button */
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: scale(var(--animation-scale));
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+        }
+        
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Privacy Mode */
+        .privacy-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            text-align: center;
+        }
+        
+        .privacy-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-lg);
+            opacity: 0.5;
+        }
+        
+        .privacy-icon svg {
+            width: 64px;
+            height: 64px;
+        }
+        
+        .privacy-title {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--space-md);
+        }
+        
+        .privacy-description {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xl);
+            max-width: 400px;
+        }
+        
+        /* Weather error styles */
+        .weather-error {
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            padding: var(--space-md);
+            border-radius: 8px;
+            font-size: var(--font-size-sm);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .weather-debug {
+            margin-top: var(--space-sm);
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            font-family: monospace;
+            background: var(--bg-tertiary);
+            padding: var(--space-sm);
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                gap: var(--space-lg);
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 3;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: var(--space-lg);
+            }
+            
+            .tiles-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: var(--space-md);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-md);
+                gap: var(--space-md);
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-md);
+            }
+            
+            .current-time {
+                font-size: var(--font-size-3xl);
+            }
+            
+            .search-input {
+                padding: var(--space-md);
+                font-size: var(--font-size-base);
+            }
+            
+            .tiles-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Error states */
+        .error {
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            padding: var(--space-sm);
+            border-radius: 8px;
+            font-size: var(--font-size-sm);
+        }
+        
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Focus styles for accessibility */
+        .focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        
+        /* High contrast support */
+        @media (prefers-contrast: high) {
+            :root {
+                --border: #000000;
+                --shadow: rgba(0, 0, 0, 0.5);
+            }
+            
+            [data-theme="dark"] {
+                --border: #FFFFFF;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Privacy Mode Overlay -->
+    <div id="privacyOverlay" class="privacy-overlay hidden">
+        <div class="privacy-icon">
+            <i data-lucide="lock" aria-hidden="true"></i>
+        </div>
+        <h2 class="privacy-title">Privacy Mode Active</h2>
+        <p class="privacy-description">Personal widgets are hidden for screen sharing. Click below to disable privacy mode.</p>
+        <button class="btn btn-primary" onclick="togglePrivacyMode()">
+            <i data-lucide="unlock" aria-hidden="true"></i>
+            Disable Privacy Mode
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="time-section">
+                <div id="greeting" class="greeting" role="status" aria-live="polite"></div>
+                <div id="currentTime" class="current-time" role="timer" aria-live="off"></div>
+                <div id="currentDate" class="current-date"></div>
+            </div>
+            <div class="controls">
+                <button class="icon-button" onclick="togglePrivacyMode()" title="Toggle Privacy Mode" aria-label="Toggle Privacy Mode">
+                    <i data-lucide="lock" aria-hidden="true"></i>
+                </button>
+                <button id="themeToggle" class="icon-button" onclick="toggleTheme()" title="Toggle Theme (T)" aria-label="Toggle Theme">
+                    <i data-lucide="moon" aria-hidden="true"></i>
+                </button>
+                <button class="icon-button" onclick="openSettings()" title="Settings" aria-label="Open Settings">
+                    <i data-lucide="settings" aria-hidden="true"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Search -->
+            <section class="search-section">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search or type a command (/ for help)..."
+                    aria-label="Universal search input"
+                    aria-describedby="searchHelp"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <div id="searchSuggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
+                <div id="searchHelp" class="sr-only">
+                    Type to search or use commands like /g for Google, /ddg for DuckDuckGo, /yt for YouTube, /gh for GitHub, /gpt for ChatGPT
+                </div>
+            </section>
+
+            <!-- Quick Links -->
+            <section class="quick-links">
+                <div class="section-header">
+                    <h2 class="section-title">Quick Links</h2>
+                    <button class="icon-button" onclick="addTile()" title="Add New Tile (N)" aria-label="Add New Tile">
+                        <i data-lucide="plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div id="tilesGrid" class="tiles-grid" role="grid" aria-label="Quick links grid">
+                    <!-- Tiles will be dynamically generated -->
+                </div>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <!-- Weather -->
+            <section class="sidebar-section" id="weatherSection">
+                <h3 class="sidebar-title">
+                    <i data-lucide="sun" aria-hidden="true"></i>
+                    Weather
+                    <button class="icon-button" onclick="refreshWeather()" title="Refresh Weather" aria-label="Refresh Weather" style="margin-left: auto; width: 24px; height: 24px;">
+                        <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                    </button>
+                </h3>
+                <div id="weatherContent">
+                    <div class="skeleton" style="height: 80px; border-radius: 8px; margin-bottom: 1rem;"></div>
+                    <div class="skeleton" style="height: 120px; border-radius: 8px;"></div>
+                </div>
+            </section>
+
+            <!-- Pomodoro Timer -->
+            <section class="sidebar-section" id="timerSection">
+                <h3 class="sidebar-title">
+                    <i data-lucide="timer" aria-hidden="true"></i>
+                    Focus Timer
+                </h3>
+                <div class="timer-display">
+                    <div id="timerTime" class="timer-time" role="timer" aria-live="off">25:00</div>
+                    <div id="timerLabel" class="timer-label">Focus Session</div>
+                </div>
+                <div class="timer-controls">
+                    <button id="timerStart" class="timer-button" onclick="startTimer()" aria-label="Start timer">
+                        <i data-lucide="play" aria-hidden="true"></i>
+                        Start
+                    </button>
+                    <button id="timerPause" class="timer-button secondary" onclick="pauseTimer()" aria-label="Pause timer" style="display: none;">
+                        <i data-lucide="pause" aria-hidden="true"></i>
+                        Pause
+                    </button>
+                    <button class="timer-button secondary" onclick="resetTimer()" aria-label="Reset timer">
+                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                        Reset
+                    </button>
+                </div>
+                <div id="timerStats" class="timer-stats">
+                    Sessions completed today: <span id="sessionsToday">0</span>
+                </div>
+            </section>
+
+            <!-- Notes & Goals -->
+            <section class="sidebar-section" id="notesSection">
+                <h3 class="sidebar-title">
+                    <i data-lucide="file-text" aria-hidden="true"></i>
+                    Notes & Goals
+                </h3>
+                <div class="notes-tabs" role="tablist">
+                    <button class="notes-tab active" onclick="switchNotesTab(event, 'notes')" aria-label="Switch to notes" role="tab" aria-selected="true">
+                        Notes
+                    </button>
+                    <button class="notes-tab" onclick="switchNotesTab(event, 'goals')" aria-label="Switch to goals" role="tab" aria-selected="false">
+                        Goals
+                    </button>
+                    <button class="notes-tab" onclick="switchNotesTab(event, 'templates')" aria-label="Switch to prompt templates" role="tab" aria-selected="false">
+                        Templates
+                    </button>
+                </div>
+                <div id="notesContent" class="notes-content">
+                    <textarea 
+                        id="notesTextarea" 
+                        class="notes-textarea" 
+                        placeholder="Write your notes here... (Supports Markdown)"
+                        aria-label="Notes textarea"
+                    ></textarea>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay" role="dialog" aria-labelledby="settingsTitle" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="settingsTitle" class="modal-title">Settings</h2>
+                <button class="modal-close" onclick="closeSettings()" aria-label="Close settings">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs" role="tablist">
+                    <button class="settings-tab active" onclick="switchSettingsTab(event, 'general')" role="tab" aria-selected="true">General</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'appearance')" role="tab" aria-selected="false">Appearance</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'weather')" role="tab" aria-selected="false">Weather</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'shortcuts')" role="tab" aria-selected="false">Shortcuts</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(event, 'data')" role="tab" aria-selected="false">Data</button>
+                </div>
+                
+                <div id="settingsContent">
+                    <!-- Settings content will be dynamically generated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tile Edit Modal -->
+    <div id="tileModal" class="modal-overlay" role="dialog" aria-labelledby="tileModalTitle" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="tileModalTitle" class="modal-title">Edit Tile</h2>
+                <button class="modal-close" onclick="closeTileModal()" aria-label="Close tile editor">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="tileForm">
+                    <div class="settings-group">
+                        <label class="settings-label" for="tileTitle">Title</label>
+                        <input type="text" id="tileTitle" class="settings-input" required>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="tileUrl">URL</label>
+                        <input type="url" id="tileUrl" class="settings-input" required>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="tileIcon">Icon (Emoji or Lucide icon name)</label>
+                        <input type="text" id="tileIcon" class="settings-input" placeholder="🌟 or heart">
+                        <small>Use emoji or Lucide icon name (e.g., "heart", "star", "github")</small>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="tileTag">Tag (Optional)</label>
+                        <input type="text" id="tileTag" class="settings-input" placeholder="Work, Personal, etc.">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTileModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTile()">Save</button>
+                <button id="deleteTileBtn" class="btn btn-secondary" onclick="deleteTile()" style="margin-right: auto;">
+                    <i data-lucide="trash-2" aria-hidden="true"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Edit Modal -->
+    <div id="commandModal" class="modal-overlay" role="dialog" aria-labelledby="commandModalTitle" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="commandModalTitle" class="modal-title">Edit Command</h2>
+                <button class="modal-close" onclick="closeCommandModal()" aria-label="Close command editor">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="commandForm">
+                    <div class="settings-group">
+                        <label class="settings-label" for="commandShortcut">Shortcut</label>
+                        <input type="text" id="commandShortcut" class="settings-input" placeholder="/gpt" required>
+                        <small>Must start with "/" and contain no spaces</small>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="commandName">Name</label>
+                        <input type="text" id="commandName" class="settings-input" placeholder="ChatGPT" required>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="commandUrl">URL Template</label>
+                        <input type="url" id="commandUrl" class="settings-input" placeholder="https://chat.openai.com/" required>
+                        <small>Use {query} placeholder for search terms (optional)</small>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label" for="commandIcon">Icon (Emoji or Lucide name)</label>
+                        <input type="text" id="commandIcon" class="settings-input" placeholder="🤖 or bot">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCommandModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCommand()">Save</button>
+                <button id="deleteCommandBtn" class="btn btn-secondary" onclick="deleteCommand()" style="margin-right: auto;">
+                    <i data-lucide="trash-2" aria-hidden="true"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen reader only text -->
+    <div class="sr-only" aria-live="polite" id="announcements"></div>
+
+    <script>
+        // ============================================================================
+        // SMART NEW TAB - CORE APPLICATION
+        // ============================================================================
+        
+        'use strict';
+        
+        // Global state
+        const AppState = {
+            settings: {},
+            tiles: [],
+            weather: null,
+            timer: {
+                isRunning: false,
+                isPaused: false,
+                currentTime: 25 * 60, // 25 minutes in seconds
+                sessionType: 'focus', // 'focus', 'shortBreak', 'longBreak'
+                sessionsCompleted: 0,
+                interval: null,
+                targetTime: null
+            },
+            notes: {
+                current: 'notes',
+                notes: '',
+                goals: '',
+                templates: []
+            },
+            currentTileId: null,
+            currentCommandId: null,
+            searchSuggestions: [],
+            activeSearchIndex: -1
+        };
+        
+        // Default settings
+        const DefaultSettings = {
+            theme: 'auto', // 'light', 'dark', 'auto'
+            accentColor: '#5D5CDE',
+            timeFormat: 'auto', // '12', '24', 'auto'
+            showSeconds: true,
+            weatherProvider: 'openweathermap', // 'openweathermap', 'weathergov', 'tomorrow'
+            weatherApiKey: '',
+            weatherUnit: 'metric', // 'metric', 'imperial'
+            weatherLocation: '',
+            useGeolocation: true,
+            searchEngine: 'google',
+            privacyMode: false,
+            enableNotifications: true,
+            compactMode: false,
+            backgroundType: 'solid', // 'solid', 'gradient', 'image'
+            backgroundImage: '',
+            fontScale: 1,
+            tileSize: 'medium', // 'small', 'medium', 'large'
+            showGreeting: true,
+            pomodoroFocus: 25,
+            pomodoroShortBreak: 5,
+            pomodoroLongBreak: 15,
+            autoStartBreaks: false,
+            notificationSound: true,
+            searchCommands: {} // Will be populated with defaults
+        };
+        
+        // Default search commands
+        const DefaultSearchCommands = {
+            '/g': { name: 'Google', url: 'https://www.google.com/search?q={query}', icon: 'search' },
+            '/ddg': { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q={query}', icon: 'search' },
+            '/yt': { name: 'YouTube', url: 'https://www.youtube.com/results?search_query={query}', icon: 'youtube' },
+            '/gh': { name: 'GitHub', url: 'https://github.com/search?q={query}', icon: 'github' },
+            '/mdn': { name: 'MDN', url: 'https://developer.mozilla.org/en-US/search?q={query}', icon: 'book' },
+            '/so': { name: 'Stack Overflow', url: 'https://stackoverflow.com/search?q={query}', icon: 'help-circle' },
+            '/gpt': { name: 'ChatGPT', url: 'https://chat.openai.com/', icon: 'bot', copyQuery: true },
+            '/cd': { name: 'Claude', url: 'https://claude.ai/', icon: 'zap', copyQuery: true },
+            '/pt': { name: 'PromptoTron', url: 'https://poe.com/PromptTemplateBot', icon: 'sparkles', copyQuery: true },
+            '/w': { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Special:Search?search={query}', icon: 'book-open' },
+            '/amz': { name: 'Amazon', url: 'https://www.amazon.com/s?k={query}', icon: 'package' },
+            '/hn': { name: 'Hacker News', url: 'https://hn.algolia.com/?q={query}', icon: 'newspaper' },
+            '/red': { name: 'Reddit', url: 'https://www.reddit.com/search/?q={query}', icon: 'message-circle' },
+            '/tw': { name: 'Twitter', url: 'https://twitter.com/search?q={query}', icon: 'twitter' },
+            '/li': { name: 'LinkedIn', url: 'https://www.linkedin.com/search/results/all/?keywords={query}', icon: 'linkedin' }
+        };
+        
+        // Default tiles
+        const DefaultTiles = [
+            {
+                id: 'chatgpt',
+                title: 'ChatGPT',
+                url: 'https://chat.openai.com/',
+                icon: 'bot',
+                tag: 'AI'
+            },
+            {
+                id: 'claude',
+                title: 'Claude',
+                url: 'https://claude.ai/',
+                icon: 'zap',
+                tag: 'AI'
+            },
+            {
+                id: 'github',
+                title: 'GitHub',
+                url: 'https://github.com/',
+                icon: 'github',
+                tag: 'Dev'
+            },
+            {
+                id: 'stackoverflow',
+                title: 'Stack Overflow',
+                url: 'https://stackoverflow.com/',
+                icon: 'help-circle',
+                tag: 'Dev'
+            }
+        ];
+        
+        // Default prompt templates
+        const DefaultTemplates = [
+            { name: 'Code Review', template: 'Please review this code for:\n- Performance issues\n- Security vulnerabilities\n- Best practices\n- Potential bugs\n\nCode:\n```\n[PASTE CODE HERE]\n```' },
+            { name: 'Explain Code', template: 'Please explain this code step by step:\n\n```\n[PASTE CODE HERE]\n```\n\nFocus on:\n- What it does\n- How it works\n- Key concepts used' },
+            { name: 'Debug Help', template: 'I\'m having an issue with this code:\n\n```\n[PASTE CODE HERE]\n```\n\nError message:\n```\n[PASTE ERROR HERE]\n```\n\nExpected behavior: [DESCRIBE EXPECTED BEHAVIOR]\nActual behavior: [DESCRIBE ACTUAL BEHAVIOR]' },
+            { name: 'Optimize Code', template: 'Please help optimize this code for:\n- Performance\n- Readability\n- Memory usage\n\nCode:\n```\n[PASTE CODE HERE]\n```' },
+            { name: 'Write Tests', template: 'Please write comprehensive tests for this function:\n\n```\n[PASTE CODE HERE]\n```\n\nInclude:\n- Unit tests\n- Edge cases\n- Error scenarios' }
+        ];
+        
+        // ============================================================================
+        // UTILITY FUNCTIONS
+        // ============================================================================
+        
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Throttle function
+        function throttle(func, limit) {
+            let inThrottle;
+            return function(...args) {
+                if (!inThrottle) {
+                    func.apply(this, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+        
+        // Format time
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // Sanitize HTML
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Announce to screen readers
+        function announce(message) {
+            const announcements = document.getElementById('announcements');
+            announcements.textContent = message;
+            setTimeout(() => announcements.textContent = '', 1000);
+        }
+        
+        // Create icon element (Lucide or emoji fallback)
+        function createIcon(iconName, fallbackEmoji = '🌐') {
+            const container = document.createElement('span');
+            
+            // Check if it's an emoji (contains Unicode emoji characters)
+            const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
+            
+            if (emojiRegex.test(iconName)) {
+                container.textContent = iconName;
+                return container;
+            }
+            
+            // Try to create Lucide icon
+            try {
+                const iconElement = document.createElement('i');
+                iconElement.setAttribute('data-lucide', iconName);
+                container.appendChild(iconElement);
+                
+                // Initialize the icon if Lucide is available
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+                
+                return container;
+            } catch (error) {
+                // Fallback to emoji
+                container.textContent = fallbackEmoji;
+                return container;
+            }
+        }
+        
+        // Weather unit conversion helpers
+        function fToC(f) { return (f - 32) * 5/9; }
+        function mphToKmh(mph) { return mph * 1.60934; }
+        function parseWindStr(str) {
+            if (!str) return null;
+            const nums = str.match(/(\d+(\.\d+)?)/g);
+            if (!nums || !nums.length) return null;
+            const avg = nums.map(Number).reduce((a,b)=>a+b,0) / nums.length;
+            return avg; // in mph
+        }
+        
+        // ============================================================================
+        // STORAGE MANAGEMENT
+        // ============================================================================
+        
+        function saveSettings() {
+            try {
+                localStorage.setItem('smartnewtab_settings', JSON.stringify(AppState.settings));
+            } catch (error) {
+                console.error('Failed to save settings:', error);
+            }
+        }
+        
+        function loadSettings() {
+            try {
+                const stored = localStorage.getItem('smartnewtab_settings');
+                if (stored) {
+                    const storedSettings = JSON.parse(stored);
+                    AppState.settings = { 
+                        ...DefaultSettings, 
+                        ...storedSettings,
+                        searchCommands: { ...DefaultSearchCommands, ...(storedSettings.searchCommands || {}) }
+                    };
+                } else {
+                    AppState.settings = { 
+                        ...DefaultSettings,
+                        searchCommands: { ...DefaultSearchCommands }
+                    };
+                }
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+                AppState.settings = { 
+                    ...DefaultSettings,
+                    searchCommands: { ...DefaultSearchCommands }
+                };
+            }
+        }
+        
+        function saveTiles() {
+            try {
+                localStorage.setItem('smartnewtab_tiles', JSON.stringify(AppState.tiles));
+            } catch (error) {
+                console.error('Failed to save tiles:', error);
+            }
+        }
+        
+        function loadTiles() {
+            try {
+                const stored = localStorage.getItem('smartnewtab_tiles');
+                if (stored) {
+                    AppState.tiles = JSON.parse(stored);
+                } else {
+                    AppState.tiles = [...DefaultTiles];
+                    saveTiles();
+                }
+            } catch (error) {
+                console.error('Failed to load tiles:', error);
+                AppState.tiles = [...DefaultTiles];
+            }
+        }
+        
+        function saveNotes() {
+            try {
+                localStorage.setItem('smartnewtab_notes', JSON.stringify(AppState.notes));
+            } catch (error) {
+                console.error('Failed to save notes:', error);
+            }
+        }
+        
+        function loadNotes() {
+            try {
+                const stored = localStorage.getItem('smartnewtab_notes');
+                if (stored) {
+                    AppState.notes = { ...AppState.notes, ...JSON.parse(stored) };
+                } else {
+                    AppState.notes.templates = [...DefaultTemplates];
+                    saveNotes();
+                }
+            } catch (error) {
+                console.error('Failed to load notes:', error);
+                AppState.notes.templates = [...DefaultTemplates];
+            }
+        }
+        
+        function saveTimerStats() {
+            try {
+                const stats = {
+                    sessionsCompleted: AppState.timer.sessionsCompleted,
+                    lastSessionDate: new Date().toDateString()
+                };
+                localStorage.setItem('smartnewtab_timer', JSON.stringify(stats));
+            } catch (error) {
+                console.error('Failed to save timer stats:', error);
+            }
+        }
+        
+        function loadTimerStats() {
+            try {
+                const stored = localStorage.getItem('smartnewtab_timer');
+                if (stored) {
+                    const stats = JSON.parse(stored);
+                    const today = new Date().toDateString();
+                    if (stats.lastSessionDate === today) {
+                        AppState.timer.sessionsCompleted = stats.sessionsCompleted || 0;
+                    } else {
+                        AppState.timer.sessionsCompleted = 0;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load timer stats:', error);
+                AppState.timer.sessionsCompleted = 0;
+            }
+        }
+        
+        // ============================================================================
+        // THEME MANAGEMENT
+        // ============================================================================
+        
+        function applyTheme() {
+            const { theme, accentColor } = AppState.settings;
+            const root = document.documentElement;
+            
+            // Remove existing theme classes
+            root.removeAttribute('data-theme');
+            
+            if (theme === 'light') {
+                root.setAttribute('data-theme', 'light');
+            } else if (theme === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+            }
+            // Auto theme uses CSS media query
+            
+            // Apply accent color
+            root.style.setProperty('--accent', accentColor);
+            root.style.setProperty('--primary', accentColor);
+            
+            // Update theme toggle icon
+            const themeButton = document.getElementById('themeToggle');
+            if (themeButton) {
+                const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                const iconElement = themeButton.querySelector('[data-lucide]');
+                if (iconElement) {
+                    iconElement.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }
+                themeButton.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            }
+        }
+        
+        // FIXED: Simplified theme toggle - light -> dark -> auto
+        function toggleTheme() {
+            const currentTheme = AppState.settings.theme;
+            let newTheme;
+            
+            if (currentTheme === 'auto') {
+                newTheme = 'light';
+            } else if (currentTheme === 'light') {
+                newTheme = 'dark';
+            } else {
+                newTheme = 'auto';
+            }
+            
+            AppState.settings.theme = newTheme;
+            saveSettings();
+            applyTheme();
+            announce(`Theme changed to ${newTheme}`);
+        }
+        
+        // ============================================================================
+        // TIME AND DATE
+        // ============================================================================
+        
+        function updateClock() {
+            const now = new Date();
+            const timeElement = document.getElementById('currentTime');
+            const dateElement = document.getElementById('currentDate');
+            
+            if (!timeElement || !dateElement) return;
+            
+            // Time formatting
+            const { timeFormat, showSeconds } = AppState.settings;
+            let timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: timeFormat === '12' || (timeFormat === 'auto' && is12HourLocale())
+            };
+            
+            if (showSeconds) {
+                timeOptions.second = '2-digit';
+            }
+            
+            const timeFormatter = new Intl.DateTimeFormat('default', timeOptions);
+            timeElement.textContent = timeFormatter.format(now);
+            
+            // Date formatting
+            const dateOptions = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            
+            const dateFormatter = new Intl.DateTimeFormat('default', dateOptions);
+            dateElement.textContent = dateFormatter.format(now);
+        }
+        
+        function is12HourLocale() {
+            const testDate = new Date();
+            const formatter = new Intl.DateTimeFormat('default', { 
+                hour: 'numeric',
+                hour12: undefined // Let browser decide
+            });
+            const formatted = formatter.format(testDate);
+            return /AM|PM/i.test(formatted);
+        }
+        
+        function updateGreeting() {
+            const greetingElement = document.getElementById('greeting');
+            if (!greetingElement || !AppState.settings.showGreeting) {
+                if (greetingElement) greetingElement.textContent = '';
+                return;
+            }
+            
+            const hour = new Date().getHours();
+            let greeting = '';
+            
+            if (hour < 6) {
+                greeting = 'Working late? ';
+            } else if (hour < 12) {
+                greeting = 'Good morning! ';
+            } else if (hour < 17) {
+                greeting = 'Good afternoon! ';
+            } else if (hour < 22) {
+                greeting = 'Good evening! ';
+            } else {
+                greeting = 'Good night! ';
+            }
+            
+            // Add weather context if available
+            if (AppState.weather) {
+                const weather = AppState.weather;
+                const temp = Math.round(weather.current.temp);
+                const unit = AppState.settings.weatherUnit === 'metric' ? '°C' : '°F';
+                
+                if (weather.current.condition.includes('rain') && weather.forecast?.length > 0) {
+                    const rainTime = weather.forecast.find(f => f.condition.includes('rain'));
+                    if (rainTime) {
+                        greeting += `Take an umbrella—rain expected.`;
+                    } else {
+                        greeting += `Currently ${temp}${unit} and ${weather.current.condition}.`;
+                    }
+                } else if (temp > (AppState.settings.weatherUnit === 'metric' ? 25 : 77)) {
+                    greeting += `It's warm today (${temp}${unit})—stay hydrated!`;
+                } else if (temp < (AppState.settings.weatherUnit === 'metric' ? 10 : 50)) {
+                    greeting += `Bundle up—it's ${temp}${unit} outside.`;
+                } else {
+                    greeting += `Perfect weather today: ${temp}${unit} and ${weather.current.condition}.`;
+                }
+            }
+            
+            greetingElement.textContent = greeting;
+        }
+        
+        // ============================================================================
+        // WEATHER
+        // ============================================================================
+        
+        class WeatherService {
+            constructor() {
+                this.cache = new Map();
+                this.lastFetch = 0;
+                this.refreshInterval = 20 * 60 * 1000; // 20 minutes
+            }
+            
+            async getCurrentLocation() {
+                return new Promise((resolve, reject) => {
+                    if (!navigator.geolocation) {
+                        reject(new Error('Geolocation not supported'));
+                        return;
+                    }
+                    
+                    const options = {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes
+                    };
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        position => resolve({
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude
+                        }),
+                        error => reject(error),
+                        options
+                    );
+                });
+            }
+            
+            async fetchWeather(location = null) {
+                const { weatherProvider, weatherApiKey, useGeolocation, weatherLocation } = AppState.settings;
+                
+                let coords = location;
+                
+                if (!coords && useGeolocation) {
+                    try {
+                        coords = await this.getCurrentLocation();
+                    } catch (error) {
+                        console.warn('Geolocation failed:', error);
+                        if (weatherLocation) {
+                            coords = { query: weatherLocation };
+                        }
+                    }
+                } else if (!coords && weatherLocation) {
+                    coords = { query: weatherLocation };
+                }
+                
+                if (!coords) {
+                    throw new Error('No location available. Please enable geolocation or set a manual location in settings.');
+                }
+                
+                // Check cache
+                const cacheKey = JSON.stringify(coords);
+                const cached = this.cache.get(cacheKey);
+                const now = Date.now();
+                
+                if (cached && (now - this.lastFetch) < this.refreshInterval) {
+                    return cached;
+                }
+                
+                let weatherData;
+                
+                try {
+                    switch (weatherProvider) {
+                        case 'openweathermap':
+                            weatherData = await this.fetchOpenWeatherMap(coords, weatherApiKey);
+                            break;
+                        case 'weathergov':
+                            weatherData = await this.fetchWeatherGov(coords);
+                            break;
+                        case 'tomorrow':
+                            weatherData = await this.fetchTomorrowIO(coords, weatherApiKey);
+                            break;
+                        default:
+                            throw new Error('Unknown weather provider');
+                    }
+                    
+                    this.cache.set(cacheKey, weatherData);
+                    this.lastFetch = now;
+                    
+                    return weatherData;
+                } catch (error) {
+                    // Return cached data if available
+                    if (cached) {
+                        console.warn('Using cached weather data due to fetch error:', error);
+                        return cached;
+                    }
+                    throw error;
+                }
+            }
+            
+            async fetchOpenWeatherMap(coords, apiKey) {
+                if (!apiKey) {
+                    throw new Error('OpenWeatherMap API key required. Get one free at openweathermap.org/api');
+                }
+                
+                const unit = AppState.settings.weatherUnit === 'metric' ? 'metric' : 'imperial';
+                let url;
+                
+                if (coords.lat && coords.lon) {
+                    url = `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=${unit}`;
+                } else {
+                    url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(coords.query)}&appid=${apiKey}&units=${unit}`;
+                }
+                
+                console.log('Weather API URL:', url.replace(apiKey, 'HIDDEN_API_KEY'));
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
+                try {
+                    const response = await fetch(url, { 
+                        signal: controller.signal,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Weather API error response:', errorText);
+                        throw new Error(`Weather API error (${response.status}): ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Weather API response:', data);
+                    
+                    return this.normalizeWeatherData(data, 'openweathermap');
+                } catch (error) {
+                    console.error('Weather fetch error:', error);
+                    throw error;
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            }
+            
+            async fetchWeatherGov(coords) {
+                // Weather.gov only works for US locations and requires lat/lon
+                if (!coords.lat || !coords.lon) {
+                    throw new Error('Weather.gov requires coordinates. Please enable geolocation or use another provider.');
+                }
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
+                try {
+                    // First get the grid point
+                    const pointUrl = `https://api.weather.gov/points/${coords.lat},${coords.lon}`;
+                    const pointResponse = await fetch(pointUrl, { signal: controller.signal });
+                    
+                    if (!pointResponse.ok) {
+                        throw new Error(`Weather.gov point error: ${pointResponse.status}`);
+                    }
+                    
+                    const pointData = await pointResponse.json();
+                    
+                    // Then get the forecast
+                    const forecastUrl = pointData.properties.forecast;
+                    const forecastResponse = await fetch(forecastUrl, { signal: controller.signal });
+                    
+                    if (!forecastResponse.ok) {
+                        throw new Error(`Weather.gov forecast error: ${forecastResponse.status}`);
+                    }
+                    
+                    const forecastData = await forecastResponse.json();
+                    
+                    return this.normalizeWeatherData(forecastData, 'weathergov');
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            }
+            
+            async fetchTomorrowIO(coords, apiKey) {
+                if (!apiKey) {
+                    throw new Error('Tomorrow.io API key required');
+                }
+                
+                let location;
+                if (coords.lat && coords.lon) {
+                    location = `${coords.lat},${coords.lon}`;
+                } else {
+                    location = coords.query;
+                }
+                
+                const units = AppState.settings.weatherUnit === 'metric' ? 'metric' : 'imperial';
+                const url = `https://api.tomorrow.io/v4/weather/realtime?location=${encodeURIComponent(location)}&apikey=${apiKey}&units=${units}`;
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
+                try {
+                    const response = await fetch(url, { signal: controller.signal });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Tomorrow.io error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    return this.normalizeWeatherData(data, 'tomorrow');
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            }
+            
+            normalizeWeatherData(data, provider) {
+                const normalized = {
+                    current: {},
+                    forecast: [],
+                    location: '',
+                    provider
+                };
+                
+                switch (provider) {
+                    case 'openweathermap':
+                        normalized.current = {
+                            temp: data.main.temp,
+                            condition: data.weather[0].description,
+                            humidity: data.main.humidity,
+                            windSpeed: data.wind?.speed || 0,
+                            icon: this.getWeatherIcon(data.weather[0].icon, provider)
+                        };
+                        normalized.location = data.name + (data.sys?.country ? `, ${data.sys.country}` : '');
+                        break;
+                        
+                    case 'weathergov': {
+                        const current = data.properties.periods[0];
+                        const isMetric = AppState.settings.weatherUnit === 'metric';
+                        const tempF = current.temperature;
+                        const windMph = parseWindStr(current.windSpeed);
+                        
+                        normalized.current = {
+                            temp: isMetric ? fToC(tempF) : tempF,
+                            condition: current.shortForecast,
+                            humidity: null,
+                            windSpeed: isMetric && windMph != null ? mphToKmh(windMph) : windMph,
+                            icon: this.getWeatherIcon(current.icon, provider)
+                        };
+                        normalized.location = 'US Location';
+                        
+                        // Add forecast
+                        normalized.forecast = data.properties.periods.slice(1, 6).map(period => {
+                            const tF = period.temperature;
+                            return {
+                                time: period.name,
+                                temp: isMetric ? fToC(tF) : tF,
+                                condition: period.shortForecast,
+                                icon: this.getWeatherIcon(period.icon, provider)
+                            };
+                        });
+                        break;
+                    }
+                        
+                    case 'tomorrow':
+                        const values = data.data.values;
+                        normalized.current = {
+                            temp: values.temperature,
+                            condition: this.getConditionFromCode(values.weatherCode),
+                            humidity: values.humidity,
+                            windSpeed: values.windSpeed,
+                            icon: this.getWeatherIcon(values.weatherCode, provider)
+                        };
+                        normalized.location = data.location.name || 'Location';
+                        break;
+                }
+                
+                return normalized;
+            }
+            
+            getWeatherIcon(code, provider) {
+                // Weather icon mapping to Lucide icons and emoji fallbacks
+                const iconMap = {
+                    // OpenWeatherMap icons
+                    '01d': { lucide: 'sun', emoji: '☀️' },
+                    '01n': { lucide: 'moon', emoji: '🌙' },
+                    '02d': { lucide: 'cloud-sun', emoji: '⛅' },
+                    '02n': { lucide: 'cloud-moon', emoji: '⛅' },
+                    '03d': { lucide: 'cloud', emoji: '☁️' },
+                    '03n': { lucide: 'cloud', emoji: '☁️' },
+                    '04d': { lucide: 'clouds', emoji: '☁️' },
+                    '04n': { lucide: 'clouds', emoji: '☁️' },
+                    '09d': { lucide: 'cloud-drizzle', emoji: '🌧️' },
+                    '09n': { lucide: 'cloud-drizzle', emoji: '🌧️' },
+                    '10d': { lucide: 'cloud-rain', emoji: '🌦️' },
+                    '10n': { lucide: 'cloud-rain', emoji: '🌦️' },
+                    '11d': { lucide: 'zap', emoji: '⛈️' },
+                    '11n': { lucide: 'zap', emoji: '⛈️' },
+                    '13d': { lucide: 'cloud-snow', emoji: '❄️' },
+                    '13n': { lucide: 'cloud-snow', emoji: '❄️' },
+                    '50d': { lucide: 'cloud-fog', emoji: '🌫️' },
+                    '50n': { lucide: 'cloud-fog', emoji: '🌫️' }
+                };
+                
+                // For string codes, try to match common patterns
+                if (typeof code === 'string') {
+                    const lowCode = code.toLowerCase();
+                    if (lowCode.includes('sun') || lowCode.includes('clear')) 
+                        return { lucide: 'sun', emoji: '☀️' };
+                    if (lowCode.includes('cloud')) 
+                        return { lucide: 'cloud', emoji: '☁️' };
+                    if (lowCode.includes('rain')) 
+                        return { lucide: 'cloud-rain', emoji: '🌧️' };
+                    if (lowCode.includes('storm') || lowCode.includes('thunder')) 
+                        return { lucide: 'zap', emoji: '⛈️' };
+                    if (lowCode.includes('snow')) 
+                        return { lucide: 'cloud-snow', emoji: '❄️' };
+                    if (lowCode.includes('fog') || lowCode.includes('mist')) 
+                        return { lucide: 'cloud-fog', emoji: '🌫️' };
+                    if (lowCode.includes('partly')) 
+                        return { lucide: 'cloud-sun', emoji: '⛅' };
+                }
+                
+                // For numeric codes (Tomorrow.io)
+                if (typeof code === 'number') {
+                    const numericMap = {
+                        1000: { lucide: 'sun', emoji: '☀️' }, // Clear
+                        1100: { lucide: 'cloud-sun', emoji: '⛅' }, // Partly cloudy
+                        1101: { lucide: 'cloud-sun', emoji: '⛅' },
+                        1102: { lucide: 'cloud', emoji: '☁️' },
+                        1001: { lucide: 'cloud', emoji: '☁️' }, // Cloudy
+                        4000: { lucide: 'cloud-drizzle', emoji: '🌧️' }, // Rain
+                        4200: { lucide: 'cloud-rain', emoji: '🌧️' },
+                        8000: { lucide: 'zap', emoji: '⛈️' }, // Thunderstorm
+                        5000: { lucide: 'cloud-snow', emoji: '❄️' }, // Snow
+                        5001: { lucide: 'cloud-snow', emoji: '❄️' },
+                        2000: { lucide: 'cloud-fog', emoji: '🌫️' } // Fog
+                    };
+                    
+                    if (numericMap[code]) return numericMap[code];
+                }
+                
+                return iconMap[code] || { lucide: 'cloud-sun', emoji: '🌤️' };
+            }
+            
+            getConditionFromCode(code) {
+                const conditions = {
+                    1000: 'Clear',
+                    1100: 'Mostly Clear',
+                    1101: 'Partly Cloudy',
+                    1102: 'Mostly Cloudy',
+                    1001: 'Cloudy',
+                    2000: 'Fog',
+                    4000: 'Drizzle',
+                    4001: 'Rain',
+                    4200: 'Light Rain',
+                    4201: 'Heavy Rain',
+                    5000: 'Snow',
+                    5001: 'Flurries',
+                    5100: 'Light Snow',
+                    5101: 'Heavy Snow',
+                    6000: 'Freezing Drizzle',
+                    6001: 'Freezing Rain',
+                    6200: 'Light Freezing Rain',
+                    6201: 'Heavy Freezing Rain',
+                    7000: 'Ice Pellets',
+                    7101: 'Heavy Ice Pellets',
+                    7102: 'Light Ice Pellets',
+                    8000: 'Thunderstorm'
+                };
+                
+                return conditions[code] || 'Unknown';
+            }
+        }
+        
+        const weatherService = new WeatherService();
+        
+        async function updateWeather() {
+            const weatherContent = document.getElementById('weatherContent');
+            if (!weatherContent) return;
+            
+            try {
+                // Show loading state
+                weatherContent.innerHTML = `
+                    <div class="skeleton" style="height: 80px; border-radius: 8px; margin-bottom: 1rem;"></div>
+                    <div class="skeleton" style="height: 120px; border-radius: 8px;"></div>
+                `;
+                
+                const weather = await weatherService.fetchWeather();
+                AppState.weather = weather;
+                
+                renderWeather(weather);
+                updateGreeting(); // Update greeting with weather context
+                
+            } catch (error) {
+                console.error('Weather fetch failed:', error);
+                
+                // Enhanced error display with debug info
+                const { weatherProvider, weatherApiKey, weatherLocation, useGeolocation } = AppState.settings;
+                
+                let debugInfo = `Provider: ${weatherProvider}\n`;
+                debugInfo += `API Key: ${weatherApiKey ? '[SET]' : '[NOT SET]'}\n`;
+                debugInfo += `Geolocation: ${useGeolocation ? 'enabled' : 'disabled'}\n`;
+                debugInfo += `Manual Location: ${weatherLocation || '[NOT SET]'}\n`;
+                debugInfo += `Error: ${error.message}`;
+                
+                weatherContent.innerHTML = `
+                    <div class="weather-error">
+                        <strong>Weather Unavailable</strong><br>
+                        ${error.message}
+                        <div class="weather-debug">${debugInfo}</div>
+                        <div style="margin-top: var(--space-sm);">
+                            <small>Check settings → Weather to configure API key and location.</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderWeather(weather) {
+            const weatherContent = document.getElementById('weatherContent');
+            if (!weatherContent || !weather) return;
+            
+            const unit = AppState.settings.weatherUnit === 'metric' ? '°C' : '°F';
+            const windUnit = AppState.settings.weatherUnit === 'metric' ? 'km/h' : 'mph';
+            
+            const weatherIcon = weather.current.icon;
+            const iconHtml = typeof weatherIcon === 'object' 
+                ? `<i data-lucide="${weatherIcon.lucide}" aria-hidden="true"></i>`
+                : weatherIcon;
+            
+            let html = `
+                <div class="weather-current">
+                    <div class="weather-icon" aria-hidden="true">${iconHtml}</div>
+                    <div class="weather-info">
+                        <div class="weather-temp">${Math.round(weather.current.temp)}${unit}</div>
+                        <div class="weather-desc">${weather.current.condition}</div>
+                    </div>
+                </div>
+                
+                <div class="weather-details">
+            `;
+            
+            if (weather.current.humidity !== null) {
+                html += `<div>Humidity: ${weather.current.humidity}%</div>`;
+            }
+            
+            if (weather.current.windSpeed != null) {
+                const windVal = Math.round(weather.current.windSpeed);
+                html += `<div>Wind: ${windVal} ${windUnit}</div>`;
+            }
+            
+            html += `
+                    <div>Location: ${weather.location}</div>
+                    <div>Updated: ${new Date().toLocaleTimeString()}</div>
+                </div>
+            `;
+            
+            if (weather.forecast && weather.forecast.length > 0) {
+                html += `
+                    <div class="weather-forecast">
+                        ${weather.forecast.map(item => {
+                            const forecastIcon = item.icon;
+                            const forecastIconHtml = typeof forecastIcon === 'object' 
+                                ? `<i data-lucide="${forecastIcon.lucide}" aria-hidden="true"></i>`
+                                : forecastIcon;
+                            
+                            return `
+                                <div class="forecast-item">
+                                    <div class="forecast-time">${item.time}</div>
+                                    <div class="forecast-icon" aria-hidden="true">${forecastIconHtml}</div>
+                                    <div class="forecast-temp">${Math.round(item.temp)}${unit}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+            
+            weatherContent.innerHTML = html;
+            
+            // Re-initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        function refreshWeather() {
+            weatherService.cache.clear();
+            weatherService.lastFetch = 0;
+            updateWeather();
+            announce('Weather refreshed');
+        }
+        
+        // ============================================================================
+        // QUICK LINKS / TILES
+        // ============================================================================
+        
+        function renderTiles() {
+            const tilesGrid = document.getElementById('tilesGrid');
+            if (!tilesGrid) return;
+            
+            tilesGrid.innerHTML = '';
+            
+            AppState.tiles.forEach(tile => {
+                const tileElement = createTileElement(tile);
+                tilesGrid.appendChild(tileElement);
+            });
+            
+            // Add "Add New Tile" button
+            const addTileElement = document.createElement('div');
+            addTileElement.className = 'tile add-tile';
+            addTileElement.innerHTML = `
+                <div class="tile-icon">
+                    <i data-lucide="plus" aria-hidden="true"></i>
+                </div>
+                <div class="tile-title">Add New Tile</div>
+            `;
+            addTileElement.onclick = addTile;
+            addTileElement.setAttribute('role', 'button');
+            addTileElement.setAttribute('aria-label', 'Add new tile');
+            addTileElement.setAttribute('tabindex', '0');
+            addTileElement.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    addTile();
+                }
+            });
+            
+            tilesGrid.appendChild(addTileElement);
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        function createTileElement(tile) {
+            const tileElement = document.createElement('a');
+            tileElement.className = 'tile';
+            tileElement.href = tile.url;
+            tileElement.setAttribute('data-tile-id', tile.id);
+            tileElement.setAttribute('draggable', 'true');
+            tileElement.setAttribute('role', 'gridcell');
+            tileElement.setAttribute('aria-label', `${tile.title} - ${tile.url}`);
+            
+            const iconElement = createIcon(tile.icon || 'globe', '🌐');
+            
+            tileElement.innerHTML = `
+                <div class="tile-controls">
+                    <button class="tile-control" onclick="editTile(event, '${tile.id}')" title="Edit tile" aria-label="Edit ${tile.title}">
+                        <i data-lucide="edit" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="tile-icon" aria-hidden="true">${iconElement.innerHTML}</div>
+                <div class="tile-title">${sanitizeHTML(tile.title)}</div>
+                <div class="tile-url">${sanitizeHTML(new URL(tile.url).hostname)}</div>
+            `;
+            
+            // Handle middle click and ctrl+click for new tab
+            tileElement.addEventListener('click', (e) => {
+                if (e.ctrlKey || e.metaKey || e.button === 1) {
+                    e.preventDefault();
+                    window.open(tile.url, '_blank');
+                }
+            });
+            
+            tileElement.addEventListener('auxclick', (e) => {
+                if (e.button === 1) { // Middle click
+                    e.preventDefault();
+                    window.open(tile.url, '_blank');
+                }
+            });
+            
+            // Drag and drop
+            tileElement.addEventListener('dragstart', handleDragStart);
+            tileElement.addEventListener('dragover', handleDragOver);
+            tileElement.addEventListener('drop', handleDrop);
+            tileElement.addEventListener('dragend', handleDragEnd);
+            
+            return tileElement;
+        }
+        
+        function handleDragStart(e) {
+            const el = e.currentTarget;
+            e.dataTransfer.setData('text/plain', el.getAttribute('data-tile-id'));
+            el.classList.add('dragging');
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const targetId = e.target.closest('.tile')?.getAttribute('data-tile-id');
+            
+            if (draggedId && targetId && draggedId !== targetId) {
+                reorderTiles(draggedId, targetId);
+            }
+        }
+        
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+        }
+        
+        function reorderTiles(draggedId, targetId) {
+            const draggedIndex = AppState.tiles.findIndex(t => t.id === draggedId);
+            const targetIndex = AppState.tiles.findIndex(t => t.id === targetId);
+            
+            if (draggedIndex === -1 || targetIndex === -1) return;
+            
+            const [draggedTile] = AppState.tiles.splice(draggedIndex, 1);
+            AppState.tiles.splice(targetIndex, 0, draggedTile);
+            
+            saveTiles();
+            renderTiles();
+            announce('Tiles reordered');
+        }
+        
+        function addTile() {
+            AppState.currentTileId = null;
+            openTileModal();
+        }
+        
+        function editTile(event, tileId) {
+            event.preventDefault();
+            event.stopPropagation();
+            AppState.currentTileId = tileId;
+            openTileModal();
+        }
+        
+        function openTileModal() {
+            const modal = document.getElementById('tileModal');
+            const titleElement = document.getElementById('tileModalTitle');
+            const deleteBtn = document.getElementById('deleteTileBtn');
+            const form = document.getElementById('tileForm');
+            
+            if (AppState.currentTileId) {
+                const tile = AppState.tiles.find(t => t.id === AppState.currentTileId);
+                if (!tile) return;
+                
+                titleElement.textContent = 'Edit Tile';
+                deleteBtn.style.display = 'flex';
+                
+                document.getElementById('tileTitle').value = tile.title;
+                document.getElementById('tileUrl').value = tile.url;
+                document.getElementById('tileIcon').value = tile.icon || '';
+                document.getElementById('tileTag').value = tile.tag || '';
+            } else {
+                titleElement.textContent = 'Add New Tile';
+                deleteBtn.style.display = 'none';
+                form.reset();
+            }
+            
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.getElementById('tileTitle').focus();
+        }
+        
+        function closeTileModal() {
+            const modal = document.getElementById('tileModal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            AppState.currentTileId = null;
+        }
+        
+        function saveTile() {
+            const title = document.getElementById('tileTitle').value.trim();
+            const url = document.getElementById('tileUrl').value.trim();
+            const icon = document.getElementById('tileIcon').value.trim();
+            const tag = document.getElementById('tileTag').value.trim();
+            
+            if (!title || !url) {
+                showAlert('Please fill in title and URL');
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch {
+                showAlert('Please enter a valid URL');
+                return;
+            }
+            
+            const tileData = {
+                title,
+                url,
+                icon: icon || 'globe',
+                tag
+            };
+            
+            if (AppState.currentTileId) {
+                // Edit existing tile
+                const tileIndex = AppState.tiles.findIndex(t => t.id === AppState.currentTileId);
+                if (tileIndex !== -1) {
+                    AppState.tiles[tileIndex] = { ...AppState.tiles[tileIndex], ...tileData };
+                }
+            } else {
+                // Add new tile
+                const newTile = {
+                    id: generateId(),
+                    ...tileData
+                };
+                AppState.tiles.push(newTile);
+            }
+            
+            saveTiles();
+            renderTiles();
+            closeTileModal();
+            announce(AppState.currentTileId ? 'Tile updated' : 'Tile added');
+        }
+        
+        function deleteTile() {
+            if (!AppState.currentTileId) return;
+            
+            showConfirmDialog('Are you sure you want to delete this tile?', () => {
+                AppState.tiles = AppState.tiles.filter(t => t.id !== AppState.currentTileId);
+                saveTiles();
+                renderTiles();
+                closeTileModal();
+                announce('Tile deleted');
+            });
+        }
+        
+        // ============================================================================
+        // SEARCH
+        // ============================================================================
+        
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            
+            if (!searchInput || !suggestionsContainer) return;
+            
+            // Debounced search suggestions
+            const debouncedSearch = debounce((query) => {
+                updateSearchSuggestions(query);
+            }, 150);
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value;
+                if (query.length > 0) {
+                    debouncedSearch(query);
+                } else {
+                    hideSuggestions();
+                }
+            });
+            
+            searchInput.addEventListener('keydown', (e) => {
+                handleSearchKeydown(e);
+            });
+            
+            searchInput.addEventListener('blur', () => {
+                // Delay hiding to allow clicking on suggestions
+                setTimeout(() => hideSuggestions(), 150);
+            });
+            
+            searchInput.addEventListener('focus', (e) => {
+                const query = e.target.value;
+                if (query.length > 0) {
+                    updateSearchSuggestions(query);
+                }
+            });
+        }
+        
+        function updateSearchSuggestions(query) {
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            if (!suggestionsContainer) return;
+            
+            AppState.searchSuggestions = [];
+            AppState.activeSearchIndex = -1;
+            
+            // Check for commands
+            if (query.startsWith('/')) {
+                const matchingCommands = Object.entries(AppState.settings.searchCommands)
+                    .filter(([cmd]) => cmd.startsWith(query.toLowerCase()))
+                    .map(([cmd, info]) => ({
+                        type: 'command',
+                        command: cmd,
+                        ...info
+                    }));
+                
+                AppState.searchSuggestions = matchingCommands;
+            } else {
+                // Add default search suggestions
+                AppState.searchSuggestions = [
+                    {
+                        type: 'search',
+                        name: `Search ${AppState.settings.searchEngine}`,
+                        query,
+                        icon: 'search'
+                    }
+                ];
+                
+                // Add calculator if it looks like math
+                if (/^[0-9+\-*/().\s]+$/.test(query) && query.length > 1) {
+                    try {
+                        const result = evaluateExpression(query);
+                        AppState.searchSuggestions.unshift({
+                            type: 'calculator',
+                            name: `= ${result}`,
+                            query,
+                            result,
+                            icon: 'calculator'
+                        });
+                    } catch (e) {
+                        // Invalid expression, ignore
+                    }
+                }
+            }
+            
+            renderSearchSuggestions();
+        }
+        
+        function renderSearchSuggestions() {
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            if (!suggestionsContainer) return;
+            
+            if (AppState.searchSuggestions.length === 0) {
+                hideSuggestions();
+                return;
+            }
+            
+            const html = AppState.searchSuggestions.map((suggestion, index) => {
+                const iconElement = createIcon(suggestion.icon, '🔍');
+                
+                return `
+                    <div class="search-suggestion ${index === AppState.activeSearchIndex ? 'active' : ''}" 
+                         data-index="${index}" 
+                         onclick="selectSuggestion(${index})"
+                         role="option"
+                         aria-selected="${index === AppState.activeSearchIndex}">
+                        <span class="search-suggestion-icon" aria-hidden="true">${iconElement.innerHTML}</span>
+                        <span>${sanitizeHTML(suggestion.name)}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            suggestionsContainer.innerHTML = html;
+            suggestionsContainer.style.display = 'block';
+            suggestionsContainer.setAttribute('aria-hidden', 'false');
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        function hideSuggestions() {
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'none';
+                suggestionsContainer.setAttribute('aria-hidden', 'true');
+            }
+            AppState.searchSuggestions = [];
+            AppState.activeSearchIndex = -1;
+        }
+        
+        function handleSearchKeydown(e) {
+            const suggestionsVisible = AppState.searchSuggestions.length > 0;
+            
+            switch (e.key) {
+                case 'Enter':
+                    e.preventDefault();
+                    if (suggestionsVisible && AppState.activeSearchIndex >= 0) {
+                        selectSuggestion(AppState.activeSearchIndex);
+                    } else {
+                        performSearch(e.target.value);
+                    }
+                    break;
+                    
+                case 'ArrowDown':
+                    if (suggestionsVisible) {
+                        e.preventDefault();
+                        AppState.activeSearchIndex = Math.min(
+                            AppState.activeSearchIndex + 1,
+                            AppState.searchSuggestions.length - 1
+                        );
+                        renderSearchSuggestions();
+                    }
+                    break;
+                    
+                case 'ArrowUp':
+                    if (suggestionsVisible) {
+                        e.preventDefault();
+                        AppState.activeSearchIndex = Math.max(AppState.activeSearchIndex - 1, -1);
+                        renderSearchSuggestions();
+                    }
+                    break;
+                    
+                case 'Escape':
+                    hideSuggestions();
+                    e.target.blur();
+                    break;
+            }
+        }
+        
+        function selectSuggestion(index) {
+            const suggestion = AppState.searchSuggestions[index];
+            if (!suggestion) return;
+            
+            const searchInput = document.getElementById('searchInput');
+            
+            switch (suggestion.type) {
+                case 'command':
+                    searchInput.value = suggestion.command + ' ';
+                    searchInput.focus();
+                    hideSuggestions();
+                    break;
+                    
+                case 'calculator':
+                    // Copy result to clipboard
+                    copyToClipboard(suggestion.result.toString());
+                    announce(`Result ${suggestion.result} copied to clipboard`);
+                    searchInput.value = '';
+                    hideSuggestions();
+                    break;
+                    
+                case 'search':
+                default:
+                    performSearch(suggestion.query);
+                    break;
+            }
+        }
+        
+        function performSearch(query) {
+            const trimmedQuery = query.trim();
+            if (!trimmedQuery) return;
+            
+            const searchInput = document.getElementById('searchInput');
+            
+            // Check for command
+            const spaceIndex = trimmedQuery.indexOf(' ');
+            const command = spaceIndex > 0 ? trimmedQuery.substring(0, spaceIndex) : trimmedQuery;
+            const searchTerm = spaceIndex > 0 ? trimmedQuery.substring(spaceIndex + 1) : '';
+            
+            const commandInfo = AppState.settings.searchCommands[command];
+            
+            if (commandInfo && (searchTerm || !commandInfo.url.includes('{query}'))) {
+                let searchUrl = commandInfo.url;
+                
+                if (commandInfo.copyQuery && searchTerm) {
+                    // Copy query to clipboard for AI services
+                    copyToClipboard(searchTerm);
+                    announce(`Query copied to clipboard`);
+                    showCustomNotification('Query Copied', `"${searchTerm}" copied to clipboard for ${commandInfo.name}`);
+                }
+                
+                if (searchTerm && searchUrl.includes('{query}')) {
+                    searchUrl = searchUrl.replace('{query}', encodeURIComponent(searchTerm));
+                }
+                
+                window.open(searchUrl, '_blank');
+            } else {
+                // Default search
+                const defaultEngine = AppState.settings.searchEngine || 'google';
+                const searchUrls = {
+                    google: 'https://www.google.com/search?q=',
+                    duckduckgo: 'https://duckduckgo.com/?q=',
+                    bing: 'https://www.bing.com/search?q='
+                };
+                
+                const searchUrl = (searchUrls[defaultEngine] || searchUrls.google) + encodeURIComponent(trimmedQuery);
+                window.open(searchUrl, '_blank');
+            }
+            
+            searchInput.value = '';
+            hideSuggestions();
+            searchInput.blur();
+        }
+        
+        function evaluateExpression(expr) {
+            // Simple safe math evaluator
+            const cleaned = expr.replace(/[^0-9+\-*/().]/g, '');
+            if (!cleaned) throw new Error('Invalid expression');
+            
+            // Basic validation to prevent code execution
+            if (/[a-zA-Z]/.test(cleaned)) throw new Error('Invalid expression');
+            
+            try {
+                return Function('"use strict"; return (' + cleaned + ')')();
+            } catch (e) {
+                throw new Error('Invalid expression');
+            }
+        }
+        
+        // ============================================================================
+        // SEARCH COMMANDS MANAGEMENT
+        // ============================================================================
+        
+        function openCommandModal(commandKey = null) {
+            AppState.currentCommandId = commandKey;
+            const modal = document.getElementById('commandModal');
+            const titleElement = document.getElementById('commandModalTitle');
+            const deleteBtn = document.getElementById('deleteCommandBtn');
+            const form = document.getElementById('commandForm');
+            
+            if (commandKey) {
+                const command = AppState.settings.searchCommands[commandKey];
+                if (!command) return;
+                
+                titleElement.textContent = 'Edit Command';
+                deleteBtn.style.display = 'flex';
+                
+                document.getElementById('commandShortcut').value = commandKey;
+                document.getElementById('commandName').value = command.name;
+                document.getElementById('commandUrl').value = command.url;
+                document.getElementById('commandIcon').value = command.icon || '';
+            } else {
+                titleElement.textContent = 'Add New Command';
+                deleteBtn.style.display = 'none';
+                form.reset();
+            }
+            
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.getElementById('commandShortcut').focus();
+        }
+        
+        function closeCommandModal() {
+            const modal = document.getElementById('commandModal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            AppState.currentCommandId = null;
+        }
+        
+        function saveCommand() {
+            const shortcut = document.getElementById('commandShortcut').value.trim();
+            const name = document.getElementById('commandName').value.trim();
+            const url = document.getElementById('commandUrl').value.trim();
+            const icon = document.getElementById('commandIcon').value.trim();
+            
+            if (!shortcut || !name || !url) {
+                showAlert('Please fill in all required fields');
+                return;
+            }
+            
+            if (!shortcut.startsWith('/') || shortcut.includes(' ')) {
+                showAlert('Shortcut must start with "/" and contain no spaces');
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url.replace('{query}', 'test'));
+            } catch {
+                showAlert('Please enter a valid URL');
+                return;
+            }
+            
+            // Check for conflicts (but allow editing the same command)
+            if (AppState.currentCommandId !== shortcut && AppState.settings.searchCommands[shortcut]) {
+                showAlert('This shortcut is already in use');
+                return;
+            }
+            
+            // Remove old command if editing
+            if (AppState.currentCommandId && AppState.currentCommandId !== shortcut) {
+                delete AppState.settings.searchCommands[AppState.currentCommandId];
+            }
+            
+            AppState.settings.searchCommands[shortcut] = {
+                name,
+                url,
+                icon: icon || 'search',
+                copyQuery: url.includes('chat.openai.com') || url.includes('claude.ai') || url.includes('poe.com')
+            };
+            
+            saveSettings();
+            closeCommandModal();
+            renderShortcutsSettings(document.getElementById('settingsContent'));
+            announce(AppState.currentCommandId ? 'Command updated' : 'Command added');
+        }
+        
+        function deleteCommand() {
+            if (!AppState.currentCommandId) return;
+            
+            showConfirmDialog('Are you sure you want to delete this command?', () => {
+                delete AppState.settings.searchCommands[AppState.currentCommandId];
+                saveSettings();
+                closeCommandModal();
+                renderShortcutsSettings(document.getElementById('settingsContent'));
+                announce('Command deleted');
+            });
+        }
+        
+        // ============================================================================
+        // TIMER (POMODORO)
+        // ============================================================================
+        
+        function updateTimerDisplay() {
+            const timerTimeElement = document.getElementById('timerTime');
+            const timerLabelElement = document.getElementById('timerLabel');
+            const sessionsElement = document.getElementById('sessionsToday');
+            
+            if (timerTimeElement) {
+                timerTimeElement.textContent = formatTime(AppState.timer.currentTime);
+            }
+            
+            if (timerLabelElement) {
+                const labels = {
+                    focus: 'Focus Session',
+                    shortBreak: 'Short Break',
+                    longBreak: 'Long Break'
+                };
+                timerLabelElement.textContent = labels[AppState.timer.sessionType] || 'Focus Session';
+            }
+            
+            if (sessionsElement) {
+                sessionsElement.textContent = AppState.timer.sessionsCompleted;
+            }
+            
+            // Update button states
+            const startBtn = document.getElementById('timerStart');
+            const pauseBtn = document.getElementById('timerPause');
+            
+            if (startBtn && pauseBtn) {
+                if (AppState.timer.isRunning) {
+                    startBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-flex';
+                    pauseBtn.innerHTML = '<i data-lucide="pause" aria-hidden="true"></i> Pause';
+                } else if (AppState.timer.isPaused) {
+                    startBtn.style.display = 'inline-flex';
+                    startBtn.innerHTML = '<i data-lucide="play" aria-hidden="true"></i> Resume';
+                    pauseBtn.style.display = 'none';
+                } else {
+                    startBtn.style.display = 'inline-flex';
+                    startBtn.innerHTML = '<i data-lucide="play" aria-hidden="true"></i> Start';
+                    pauseBtn.style.display = 'none';
+                }
+                
+                // Re-initialize Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+        }
+        
+        function startTimer() {
+            if (AppState.timer.isRunning) return; // Prevent double starts
+            if (AppState.timer.interval) clearInterval(AppState.timer.interval);
+            
+            AppState.timer.isRunning = true;
+            AppState.timer.isPaused = false;
+            
+            // Timestamp-based ticking (handles tab throttling better)
+            AppState.timer.targetTime = Date.now() + AppState.timer.currentTime * 1000;
+            
+            AppState.timer.interval = setInterval(() => {
+                const remaining = Math.max(0, Math.round((AppState.timer.targetTime - Date.now()) / 1000));
+                AppState.timer.currentTime = remaining;
+                updateTimerDisplay();
+                
+                if (remaining <= 0) {
+                    completeTimerSession();
+                }
+            }, 250);
+            
+            updateTimerDisplay();
+            announce('Timer started');
+        }
+        
+        function pauseTimer() {
+            if (!AppState.timer.isRunning) return;
+            
+            AppState.timer.isRunning = false;
+            AppState.timer.isPaused = true;
+            
+            if (AppState.timer.interval) {
+                clearInterval(AppState.timer.interval);
+                AppState.timer.interval = null;
+            }
+            
+            updateTimerDisplay();
+            announce('Timer paused');
+        }
+        
+        function resetTimer() {
+            AppState.timer.isRunning = false;
+            AppState.timer.isPaused = false;
+            
+            if (AppState.timer.interval) {
+                clearInterval(AppState.timer.interval);
+                AppState.timer.interval = null;
+            }
+            
+            // Reset to appropriate time based on session type
+            const durations = {
+                focus: AppState.settings.pomodoroFocus * 60,
+                shortBreak: AppState.settings.pomodoroShortBreak * 60,
+                longBreak: AppState.settings.pomodoroLongBreak * 60
+            };
+            
+            AppState.timer.currentTime = durations[AppState.timer.sessionType] || durations.focus;
+            updateTimerDisplay();
+            announce('Timer reset');
+        }
+        
+        function completeTimerSession() {
+            const prevType = AppState.timer.sessionType; // Store before switching
+            AppState.timer.isRunning = false;
+            AppState.timer.isPaused = false;
+            
+            if (AppState.timer.interval) {
+                clearInterval(AppState.timer.interval);
+                AppState.timer.interval = null;
+            }
+            
+            // Handle session completion
+            if (prevType === 'focus') {
+                AppState.timer.sessionsCompleted++;
+                saveTimerStats();
+                
+                // Determine next session type
+                const isLongBreakTime = AppState.timer.sessionsCompleted % 4 === 0;
+                AppState.timer.sessionType = isLongBreakTime ? 'longBreak' : 'shortBreak';
+            } else {
+                AppState.timer.sessionType = 'focus';
+            }
+            
+            // Set time for next session
+            const durations = {
+                focus: AppState.settings.pomodoroFocus * 60,
+                shortBreak: AppState.settings.pomodoroShortBreak * 60,
+                longBreak: AppState.settings.pomodoroLongBreak * 60
+            };
+            
+            AppState.timer.currentTime = durations[AppState.timer.sessionType];
+            
+            // Show notification
+            const sessionNames = {
+                focus: 'focus session',
+                shortBreak: 'short break',
+                longBreak: 'long break'
+            };
+            
+            const completedSession = prevType === 'focus' ? 'Focus session' : 'Break';
+            const nextSession = sessionNames[AppState.timer.sessionType];
+            
+            showNotification(`${completedSession} complete!`, `Time for a ${nextSession}.`);
+            
+            // Auto-start next session if enabled
+            if (AppState.settings.autoStartBreaks && AppState.timer.sessionType !== 'focus') {
+                setTimeout(() => startTimer(), 2000);
+            }
+            
+            updateTimerDisplay();
+            announce(`Session completed. Next: ${nextSession}`);
+        }
+        
+        // ============================================================================
+        // NOTES AND TEMPLATES
+        // ============================================================================
+        
+        function initializeNotes() {
+            updateNotesContent();
+            
+            // Auto-save notes when switching tabs or typing
+            const debouncedSave = debounce(() => {
+                const textarea = document.getElementById('notesTextarea');
+                if (textarea && textarea.style.display !== 'none' && AppState.notes.current !== 'templates') {
+                    AppState.notes[AppState.notes.current] = textarea.value;
+                    saveNotes();
+                }
+            }, 500);
+            
+            // Use event delegation since textarea might be recreated
+            document.addEventListener('input', (e) => {
+                if (e.target.id === 'notesTextarea') {
+                    debouncedSave();
+                }
+            });
+        }
+        
+        // FIXED: Better tab switching that preserves textarea properly
+        function switchNotesTab(e, tab) {
+            // Save current content ONLY if we have a textarea and it's visible
+            const textarea = document.getElementById('notesTextarea');
+            if (textarea && textarea.style.display !== 'none' && AppState.notes.current !== 'templates') {
+                AppState.notes[AppState.notes.current] = textarea.value;
+                saveNotes();
+            }
+            
+            // Update active tab
+            AppState.notes.current = tab;
+            
+            // Update UI
+            document.querySelectorAll('.notes-tab').forEach(tabEl => {
+                tabEl.classList.remove('active');
+                tabEl.setAttribute('aria-selected', 'false');
+            });
+            
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+                e.currentTarget.setAttribute('aria-selected', 'true');
+            } else {
+                // Programmatic call - find matching tab
+                const btn = [...document.querySelectorAll('.notes-tab')]
+                    .find(b => b.textContent.trim().toLowerCase() === tab.toLowerCase());
+                if (btn) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                }
+            }
+            
+            updateNotesContent();
+        }
+        
+        function updateNotesContent() {
+            const notesContent = document.getElementById('notesContent');
+            if (!notesContent) return;
+            
+            // Clear content first
+            notesContent.innerHTML = '';
+            
+            switch (AppState.notes.current) {
+                case 'notes':
+                    notesContent.innerHTML = `
+                        <textarea 
+                            id="notesTextarea" 
+                            class="notes-textarea" 
+                            placeholder="Write your notes here... (Supports Markdown)"
+                            aria-label="Notes textarea"
+                        >${AppState.notes.notes || ''}</textarea>
+                    `;
+                    break;
+                    
+                case 'goals':
+                    notesContent.innerHTML = `
+                        <textarea 
+                            id="notesTextarea" 
+                            class="notes-textarea" 
+                            placeholder="List your daily goals here...
+
+- [ ] Goal 1
+- [ ] Goal 2  
+- [x] Completed goal"
+                            aria-label="Goals textarea"
+                        >${AppState.notes.goals || ''}</textarea>
+                    `;
+                    break;
+                    
+                case 'templates':
+                    renderTemplates();
+                    break;
+            }
+        }
+        
+        function renderTemplates() {
+            const notesContent = document.getElementById('notesContent');
+            if (!notesContent) return;
+            
+            const templates = AppState.notes.templates || [];
+            
+            const html = `
+                <div style="height: 100%; overflow-y: auto; padding: var(--space-sm);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
+                        <h4 style="margin: 0; font-size: var(--font-size-sm); font-weight: 600;">AI Prompt Templates</h4>
+                        <button class="icon-button" onclick="addTemplate()" style="width: 24px; height: 24px;" title="Add Template">
+                            <i data-lucide="plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    ${templates.map((template, index) => `
+                        <div style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: var(--space-sm); margin-bottom: var(--space-sm); position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+                                <strong style="font-size: var(--font-size-sm);">${sanitizeHTML(template.name)}</strong>
+                                <div style="display: flex; gap: var(--space-xs);">
+                                    <button class="tile-control" onclick="copyTemplate(${index})" title="Copy to clipboard">
+                                        <i data-lucide="copy" aria-hidden="true"></i>
+                                    </button>
+                                    <button class="tile-control" onclick="editTemplate(${index})" title="Edit template">
+                                        <i data-lucide="edit" aria-hidden="true"></i>
+                                    </button>
+                                    <button class="tile-control" onclick="deleteTemplate(${index})" title="Delete template">
+                                        <i data-lucide="trash-2" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="font-size: var(--font-size-xs); color: var(--text-secondary); white-space: pre-wrap; max-height: 60px; overflow: hidden;">
+                                ${sanitizeHTML(template.template.substring(0, 150))}${template.template.length > 150 ? '...' : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            notesContent.innerHTML = html;
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        function copyTemplate(index) {
+            const template = AppState.notes.templates[index];
+            if (template) {
+                copyToClipboard(template.template);
+                announce(`Template "${template.name}" copied to clipboard`);
+            }
+        }
+        
+        function editTemplate(index) {
+            const template = AppState.notes.templates[index];
+            if (!template) return;
+            
+            const name = prompt('Template name:', template.name);
+            if (name === null) return;
+            
+            const content = prompt('Template content:', template.template);
+            if (content === null) return;
+            
+            AppState.notes.templates[index] = { name: name.trim(), template: content.trim() };
+            saveNotes();
+            renderTemplates();
+            announce('Template updated');
+        }
+        
+        function deleteTemplate(index) {
+            showConfirmDialog('Are you sure you want to delete this template?', () => {
+                AppState.notes.templates.splice(index, 1);
+                saveNotes();
+                renderTemplates();
+                announce('Template deleted');
+            });
+        }
+        
+        function addTemplate() {
+            const name = prompt('Template name:');
+            if (!name || !name.trim()) return;
+            
+            const content = prompt('Template content:');
+            if (!content || !content.trim()) return;
+            
+            AppState.notes.templates.push({ 
+                name: name.trim(), 
+                template: content.trim() 
+            });
+            saveNotes();
+            renderTemplates();
+            announce('Template added');
+        }
+        
+        // ============================================================================
+        // SETTINGS
+        // ============================================================================
+        
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            switchSettingsTab(null, 'general');
+        }
+        
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+        
+        function switchSettingsTab(e, tab) {
+            // Update tab buttons
+            document.querySelectorAll('.settings-tab').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+                e.currentTarget.setAttribute('aria-selected', 'true');
+            } else {
+                // Programmatic open - select matching tab
+                const btn = [...document.querySelectorAll('.settings-tab')]
+                    .find(b => b.textContent.trim().toLowerCase() === tab.toLowerCase());
+                if (btn) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                }
+            }
+            
+            // Render tab content
+            const content = document.getElementById('settingsContent');
+            if (!content) return;
+            
+            switch (tab) {
+                case 'general':
+                    renderGeneralSettings(content);
+                    break;
+                case 'appearance':
+                    renderAppearanceSettings(content);
+                    break;
+                case 'weather':
+                    renderWeatherSettings(content);
+                    break;
+                case 'shortcuts':
+                    renderShortcutsSettings(content);
+                    break;
+                case 'data':
+                    renderDataSettings(content);
+                    break;
+            }
+        }
+        
+        function renderGeneralSettings(container) {
+            container.innerHTML = `
+                <div class="settings-section">
+                    <h3>Time & Date</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Time Format</label>
+                        <select class="settings-input" onchange="updateSetting('timeFormat', this.value)">
+                            <option value="auto" ${AppState.settings.timeFormat === 'auto' ? 'selected' : ''}>Auto (based on locale)</option>
+                            <option value="12" ${AppState.settings.timeFormat === '12' ? 'selected' : ''}>12 hour</option>
+                            <option value="24" ${AppState.settings.timeFormat === '24' ? 'selected' : ''}>24 hour</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <label>Show seconds</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.showSeconds ? 'checked' : ''} onchange="updateSetting('showSeconds', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>Show greeting message</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.showGreeting ? 'checked' : ''} onchange="updateSetting('showGreeting', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Search</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Default Search Engine</label>
+                        <select class="settings-input" onchange="updateSetting('searchEngine', this.value)">
+                            <option value="google" ${AppState.settings.searchEngine === 'google' ? 'selected' : ''}>Google</option>
+                            <option value="duckduckgo" ${AppState.settings.searchEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
+                            <option value="bing" ${AppState.settings.searchEngine === 'bing' ? 'selected' : ''}>Bing</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Focus Timer</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Focus session (minutes)</label>
+                        <input type="number" class="settings-input" min="1" max="60" value="${AppState.settings.pomodoroFocus}" onchange="updateSetting('pomodoroFocus', parseInt(this.value))">
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Short break (minutes)</label>
+                        <input type="number" class="settings-input" min="1" max="30" value="${AppState.settings.pomodoroShortBreak}" onchange="updateSetting('pomodoroShortBreak', parseInt(this.value))">
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Long break (minutes)</label>
+                        <input type="number" class="settings-input" min="1" max="60" value="${AppState.settings.pomodoroLongBreak}" onchange="updateSetting('pomodoroLongBreak', parseInt(this.value))">
+                    </div>
+                    <div class="settings-row">
+                        <label>Auto-start breaks</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.autoStartBreaks ? 'checked' : ''} onchange="updateSetting('autoStartBreaks', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>Notification sound</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.notificationSound ? 'checked' : ''} onchange="updateSetting('notificationSound', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderAppearanceSettings(container) {
+            container.innerHTML = `
+                <div class="settings-section">
+                    <h3>Theme</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Color scheme</label>
+                        <select class="settings-input" onchange="updateSetting('theme', this.value)">
+                            <option value="auto" ${AppState.settings.theme === 'auto' ? 'selected' : ''}>Auto (system preference)</option>
+                            <option value="light" ${AppState.settings.theme === 'light' ? 'selected' : ''}>Light</option>
+                            <option value="dark" ${AppState.settings.theme === 'dark' ? 'selected' : ''}>Dark</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Accent color</label>
+                        <input type="color" class="settings-input" value="${AppState.settings.accentColor}" onchange="updateSetting('accentColor', this.value)">
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Layout</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Tile size</label>
+                        <select class="settings-input" onchange="updateSetting('tileSize', this.value)">
+                            <option value="small" ${AppState.settings.tileSize === 'small' ? 'selected' : ''}>Small</option>
+                            <option value="medium" ${AppState.settings.tileSize === 'medium' ? 'selected' : ''}>Medium</option>
+                            <option value="large" ${AppState.settings.tileSize === 'large' ? 'selected' : ''}>Large</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Font scale</label>
+                        <input type="range" class="settings-input" min="0.8" max="1.5" step="0.1" value="${AppState.settings.fontScale}" onchange="updateSetting('fontScale', parseFloat(this.value))">
+                        <small>Current: ${(AppState.settings.fontScale * 100).toFixed(0)}%</small>
+                    </div>
+                    <div class="settings-row">
+                        <label>Compact mode</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.compactMode ? 'checked' : ''} onchange="updateSetting('compactMode', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Background</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Background type</label>
+                        <select class="settings-input" onchange="updateSetting('backgroundType', this.value)">
+                            <option value="solid" ${AppState.settings.backgroundType === 'solid' ? 'selected' : ''}>Solid color</option>
+                            <option value="gradient" ${AppState.settings.backgroundType === 'gradient' ? 'selected' : ''}>Gradient</option>
+                            <option value="image" ${AppState.settings.backgroundType === 'image' ? 'selected' : ''}>Custom image</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Background image URL</label>
+                        <input type="url" class="settings-input" value="${AppState.settings.backgroundImage}" onchange="updateSetting('backgroundImage', this.value)" placeholder="https://example.com/image.jpg">
+                        <small>Leave empty for daily Unsplash image</small>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderWeatherSettings(container) {
+            container.innerHTML = `
+                <div class="settings-section">
+                    <h3>Weather Provider</h3>
+                    <div class="settings-group">
+                        <label class="settings-label">Provider</label>
+                        <select class="settings-input" onchange="updateSetting('weatherProvider', this.value)">
+                            <option value="openweathermap" ${AppState.settings.weatherProvider === 'openweathermap' ? 'selected' : ''}>OpenWeatherMap</option>
+                            <option value="weathergov" ${AppState.settings.weatherProvider === 'weathergov' ? 'selected' : ''}>Weather.gov (US only)</option>
+                            <option value="tomorrow" ${AppState.settings.weatherProvider === 'tomorrow' ? 'selected' : ''}>Tomorrow.io</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">API Key</label>
+                        <input type="password" class="settings-input" value="${AppState.settings.weatherApiKey}" onchange="updateSetting('weatherApiKey', this.value)" placeholder="Enter API key">
+                        <small>
+                            ${AppState.settings.weatherProvider === 'weathergov' ? 'No API key needed for Weather.gov' : 
+                              AppState.settings.weatherProvider === 'openweathermap' ? 'Get your free key at openweathermap.org/api' :
+                              'Get your key at tomorrow.io/weather-api'}
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Location</h3>
+                    <div class="settings-row">
+                        <label>Use device location</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.useGeolocation ? 'checked' : ''} onchange="updateSetting('useGeolocation', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Manual location</label>
+                        <input type="text" class="settings-input" value="${AppState.settings.weatherLocation}" onchange="updateSetting('weatherLocation', this.value)" placeholder="City name or ZIP code">
+                        <small>Used as fallback when geolocation is disabled or fails</small>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Temperature unit</label>
+                        <select class="settings-input" onchange="updateSetting('weatherUnit', this.value)">
+                            <option value="metric" ${AppState.settings.weatherUnit === 'metric' ? 'selected' : ''}>Celsius</option>
+                            <option value="imperial" ${AppState.settings.weatherUnit === 'imperial' ? 'selected' : ''}>Fahrenheit</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Actions</h3>
+                    <button class="btn btn-primary" onclick="testWeatherConnection()">Test Connection</button>
+                    <button class="btn btn-secondary" onclick="refreshWeather()">Refresh Weather</button>
+                </div>
+            `;
+        }
+        
+        function renderShortcutsSettings(container) {
+            const commands = AppState.settings.searchCommands || {};
+            
+            container.innerHTML = `
+                <div class="settings-section">
+                    <h3>Keyboard Shortcuts</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); font-size: var(--font-size-sm);">
+                        <div><kbd>/</kbd> or <kbd>Space</kbd></div><div>Focus search</div>
+                        <div><kbd>N</kbd></div><div>Add new tile</div>
+                        <div><kbd>E</kbd></div><div>Edit selected tile</div>
+                        <div><kbd>T</kbd></div><div>Toggle theme</div>
+                        <div><kbd>P</kbd></div><div>Toggle privacy mode</div>
+                        <div><kbd>Esc</kbd></div><div>Close modals/blur focus</div>
+                        <div><kbd>Tab</kbd></div><div>Navigate elements</div>
+                        <div><kbd>Enter</kbd></div><div>Activate focused element</div>
+                        <div><kbd>Ctrl/Cmd + Enter</kbd></div><div>Open all filtered tiles</div>
+                        <div><kbd>Middle click</kbd></div><div>Open tile in new tab</div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Search Commands</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
+                        <p style="margin: 0; color: var(--text-secondary); font-size: var(--font-size-sm);">Customize your search shortcuts</p>
+                        <button class="btn btn-primary" onclick="openCommandModal()">
+                            <i data-lucide="plus" aria-hidden="true"></i>
+                            Add Command
+                        </button>
+                    </div>
+                    <div class="command-list">
+                        ${Object.entries(commands).map(([shortcut, info]) => {
+                            const iconElement = createIcon(info.icon, '🔍');
+                            return `
+                                <div class="command-item">
+                                    <div class="command-shortcut">${sanitizeHTML(shortcut)}</div>
+                                    <div class="command-info">
+                                        <div class="command-name">
+                                            ${iconElement.innerHTML}
+                                            ${sanitizeHTML(info.name)}
+                                        </div>
+                                        <div class="command-url">${sanitizeHTML(info.url)}</div>
+                                    </div>
+                                    <div class="command-actions">
+                                        <button class="tile-control" onclick="openCommandModal('${shortcut}')" title="Edit command">
+                                            <i data-lucide="edit" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div style="margin-top: var(--space-md);">
+                        <p style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                            <strong>Tips:</strong><br>
+                            • Use <code>{query}</code> in URLs as a placeholder for search terms<br>
+                            • Commands starting with AI services will automatically copy queries to clipboard<br>
+                            • Use = for calculator (e.g., =2+2)
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        function renderDataSettings(container) {
+            container.innerHTML = `
+                <div class="settings-section">
+                    <h3>Data Management</h3>
+                    <div class="settings-group">
+                        <button class="btn btn-primary" onclick="exportData()">
+                            <i data-lucide="download" aria-hidden="true"></i>
+                            Export Settings
+                        </button>
+                        <small>Download all your settings, tiles, and notes as JSON</small>
+                    </div>
+                    <div class="settings-group">
+                        <label class="settings-label">Import Settings</label>
+                        <input type="file" accept=".json" onchange="importData(this)" class="settings-input">
+                        <small>Upload a previously exported JSON file</small>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Privacy</h3>
+                    <div class="settings-row">
+                        <label>Privacy mode (hide personal widgets)</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.privacyMode ? 'checked' : ''} onchange="updateSetting('privacyMode', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>Enable notifications</label>
+                        <label class="switch">
+                            <input type="checkbox" ${AppState.settings.enableNotifications ? 'checked' : ''} onchange="updateSetting('enableNotifications', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Reset</h3>
+                    <div class="settings-group">
+                        <button class="btn btn-secondary" onclick="resetAllData()">
+                            <i data-lucide="trash-2" aria-hidden="true"></i>
+                            Reset All Data
+                        </button>
+                        <small style="color: var(--text-muted);">This will delete all settings, tiles, and notes</small>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>System Test</h3>
+                    <div class="settings-group">
+                        <button class="btn btn-secondary" onclick="runSystemTest()">
+                            <i data-lucide="activity" aria-hidden="true"></i>
+                            Run Self-Test
+                        </button>
+                        <small>Test localStorage, geolocation, network, and service worker</small>
+                    </div>
+                    <div id="testResults" style="margin-top: var(--space-sm); font-size: var(--font-size-sm);"></div>
+                </div>
+            `;
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        function updateSetting(key, value) {
+            AppState.settings[key] = value;
+            saveSettings();
+            
+            // Apply immediate changes
+            switch (key) {
+                case 'theme':
+                case 'accentColor':
+                    applyTheme();
+                    break;
+                case 'showSeconds':
+                case 'timeFormat':
+                    updateClock();
+                    break;
+                case 'showGreeting':
+                    updateGreeting();
+                    break;
+                case 'privacyMode':
+                    applyPrivacyMode();
+                    break;
+                case 'fontScale':
+                    document.documentElement.style.setProperty('--font-size-base', `${value}rem`);
+                    break;
+                case 'pomodoroFocus':
+                case 'pomodoroShortBreak':
+                case 'pomodoroLongBreak':
+                    if (!AppState.timer.isRunning && !AppState.timer.isPaused) {
+                        const durations = {
+                            focus: AppState.settings.pomodoroFocus * 60,
+                            shortBreak: AppState.settings.pomodoroShortBreak * 60,
+                            longBreak: AppState.settings.pomodoroLongBreak * 60
+                        };
+                        AppState.timer.currentTime = durations[AppState.timer.sessionType] || durations.focus;
+                        updateTimerDisplay();
+                    }
+                    break;
+            }
+        }
+        
+        function testWeatherConnection() {
+            const testResults = document.getElementById('testResults');
+            if (testResults) {
+                testResults.innerHTML = '<div>Testing weather connection...</div>';
+            }
+            
+            updateWeather().then(() => {
+                if (testResults) {
+                    testResults.innerHTML = '<div style="color: green;">✓ Weather connection successful</div>';
+                }
+            }).catch(error => {
+                if (testResults) {
+                    testResults.innerHTML = `<div style="color: red;">✗ Weather connection failed: ${error.message}</div>`;
+                }
+            });
+        }
+        
+        function exportData() {
+            const data = {
+                version: '1.0.0',
+                timestamp: new Date().toISOString(),
+                settings: AppState.settings,
+                tiles: AppState.tiles,
+                notes: AppState.notes,
+                timerStats: {
+                    sessionsCompleted: AppState.timer.sessionsCompleted
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `smart-newtab-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            announce('Settings exported');
+        }
+        
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Validate data structure
+                    if (!data.version || !data.settings || !data.tiles) {
+                        throw new Error('Invalid backup file format');
+                    }
+                    
+                    // Import data
+                    AppState.settings = { 
+                        ...DefaultSettings, 
+                        ...data.settings,
+                        searchCommands: { ...DefaultSearchCommands, ...(data.settings.searchCommands || {}) }
+                    };
+                    AppState.tiles = data.tiles || [];
+                    AppState.notes = { ...AppState.notes, ...data.notes };
+                    
+                    if (data.timerStats) {
+                        AppState.timer.sessionsCompleted = data.timerStats.sessionsCompleted || 0;
+                    }
+                    
+                    // Save to localStorage
+                    saveSettings();
+                    saveTiles();
+                    saveNotes();
+                    saveTimerStats();
+                    
+                    // Apply changes
+                    applyTheme();
+                    renderTiles();
+                    updateTimerDisplay();
+                    updateNotesContent();
+                    
+                    announce('Settings imported successfully');
+                    closeSettings();
+                    
+                } catch (error) {
+                    showAlert(`Import failed: ${error.message}`);
+                }
+            };
+            
+            reader.readAsText(file);
+            input.value = ''; // Reset input
+        }
+        
+        function resetAllData() {
+            showConfirmDialog('Are you sure you want to reset all data? This cannot be undone.', () => {
+                localStorage.clear();
+                location.reload();
+            });
+        }
+        
+        function runSystemTest() {
+            const testResults = document.getElementById('testResults');
+            if (!testResults) return;
+            
+            testResults.innerHTML = '<div>Running system tests...</div>';
+            
+            const tests = [];
+            
+            // Test localStorage
+            tests.push(new Promise(resolve => {
+                try {
+                    const testKey = 'smart-newtab-test';
+                    localStorage.setItem(testKey, 'test');
+                    const value = localStorage.getItem(testKey);
+                    localStorage.removeItem(testKey);
+                    resolve({ name: 'localStorage', status: value === 'test' ? 'pass' : 'fail' });
+                } catch (error) {
+                    resolve({ name: 'localStorage', status: 'fail', error: error.message });
+                }
+            }));
+            
+            // Test geolocation
+            tests.push(new Promise(resolve => {
+                if (!navigator.geolocation) {
+                    resolve({ name: 'Geolocation', status: 'fail', error: 'Not supported' });
+                    return;
+                }
+                
+                const timeout = setTimeout(() => {
+                    resolve({ name: 'Geolocation', status: 'timeout' });
+                }, 5000);
+                
+                navigator.geolocation.getCurrentPosition(
+                    () => {
+                        clearTimeout(timeout);
+                        resolve({ name: 'Geolocation', status: 'pass' });
+                    },
+                    (error) => {
+                        clearTimeout(timeout);
+                        resolve({ name: 'Geolocation', status: 'fail', error: error.message });
+                    },
+                    { timeout: 5000 }
+                );
+            }));
+            
+            // Test network
+            tests.push(new Promise(resolve => {
+                fetch('https://httpbin.org/json', { 
+                    method: 'GET',
+                    mode: 'cors',
+                    signal: AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined
+                })
+                .then(response => {
+                    resolve({ name: 'Network', status: response.ok ? 'pass' : 'fail' });
+                })
+                .catch(error => {
+                    resolve({ name: 'Network', status: 'fail', error: error.message });
+                });
+            }));
+            
+            // Test service worker
+            tests.push(new Promise(resolve => {
+                if ('serviceWorker' in navigator) {
+                    resolve({ name: 'Service Worker', status: 'pass' });
+                } else {
+                    resolve({ name: 'Service Worker', status: 'fail', error: 'Not supported' });
+                }
+            }));
+            
+            Promise.all(tests).then(results => {
+                const html = results.map(result => {
+                    const icon = result.status === 'pass' ? '✓' : 
+                                result.status === 'timeout' ? '⏱️' : '✗';
+                    const color = result.status === 'pass' ? 'green' : 
+                                 result.status === 'timeout' ? 'orange' : 'red';
+                    const details = result.error ? ` (${result.error})` : '';
+                    
+                    return `<div style="color: ${color};">${icon} ${result.name}${details}</div>`;
+                }).join('');
+                
+                testResults.innerHTML = html;
+            });
+        }
+        
+        // ============================================================================
+        // NOTIFICATIONS
+        // ============================================================================
+        
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+        
+        function showNotification(title, body, options = {}) {
+            if (!AppState.settings.enableNotifications) return;
+            
+            // Try native notification first
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body,
+                    icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath fill="%235D5CDE" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/%3E%3C/svg%3E',
+                    ...options
+                });
+            } else {
+                // Fallback to custom notification
+                showCustomNotification(title, body);
+            }
+            
+            // Play notification sound
+            if (AppState.settings.notificationSound) {
+                playNotificationSound();
+            }
+        }
+        
+        function showCustomNotification(title, body) {
+            const notification = document.createElement('div');
+            notification.className = 'custom-notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: var(--space-lg);
+                right: var(--space-lg);
+                background: var(--bg-primary);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: var(--space-lg);
+                box-shadow: 0 8px 32px var(--shadow);
+                z-index: 1001;
+                max-width: 300px;
+                transform: translateX(100%);
+                transition: var(--transition);
+            `;
+            
+            notification.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: var(--space-xs);">${sanitizeHTML(title)}</div>
+                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">${sanitizeHTML(body)}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            requestAnimationFrame(() => {
+                notification.style.transform = 'translateX(0)';
+            });
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+        
+        function playNotificationSound() {
+            // Create a simple beep sound using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (error) {
+                console.log('Audio notification not available');
+            }
+        }
+        
+        // ============================================================================
+        // PRIVACY MODE
+        // ============================================================================
+        
+        function togglePrivacyMode() {
+            AppState.settings.privacyMode = !AppState.settings.privacyMode;
+            saveSettings();
+            applyPrivacyMode();
+            announce(AppState.settings.privacyMode ? 'Privacy mode enabled' : 'Privacy mode disabled');
+        }
+        
+        function applyPrivacyMode() {
+            const privacyOverlay = document.getElementById('privacyOverlay');
+            const timerSection = document.getElementById('timerSection');
+            const notesSection = document.getElementById('notesSection');
+            
+            if (AppState.settings.privacyMode) {
+                privacyOverlay.classList.remove('hidden');
+                if (timerSection) {
+                    timerSection.style.display = 'none';
+                    timerSection.setAttribute('aria-hidden', 'true');
+                }
+                if (notesSection) {
+                    notesSection.style.display = 'none';
+                    notesSection.setAttribute('aria-hidden', 'true');
+                }
+            } else {
+                privacyOverlay.classList.add('hidden');
+                if (timerSection) {
+                    timerSection.style.display = 'block';
+                    timerSection.setAttribute('aria-hidden', 'false');
+                }
+                if (notesSection) {
+                    notesSection.style.display = 'block';
+                    notesSection.setAttribute('aria-hidden', 'false');
+                }
+            }
+        }
+        
+        // ============================================================================
+        // UTILITY FUNCTIONS
+        // ============================================================================
+        
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                return Promise.resolve();
+            }
+        }
+        
+        function showAlert(message) {
+            showCustomModal('Notice', message, [
+                { text: 'OK', action: () => {}, primary: true }
+            ]);
+        }
+        
+        function showConfirmDialog(message, onConfirm) {
+            showCustomModal('Confirm', message, [
+                { text: 'Cancel', action: () => {} },
+                { text: 'Confirm', action: onConfirm, primary: true }
+            ]);
+        }
+        
+        function showCustomModal(title, message, buttons) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.style.zIndex = '1002';
+            
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 class="modal-title">${sanitizeHTML(title)}</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p>${sanitizeHTML(message)}</p>
+                    </div>
+                    <div class="modal-footer">
+                        ${buttons.map((btn, index) => `
+                            <button class="btn ${btn.primary ? 'btn-primary' : 'btn-secondary'}" data-index="${index}">
+                                ${sanitizeHTML(btn.text)}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.classList.contains('modal-close')) {
+                    document.body.removeChild(modal);
+                }
+                
+                if (e.target.hasAttribute('data-index')) {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    const button = buttons[index];
+                    if (button && button.action) {
+                        button.action();
+                    }
+                    document.body.removeChild(modal);
+                }
+            });
+            
+            document.body.appendChild(modal);
+            
+            // Focus first button
+            const firstButton = modal.querySelector('.btn');
+            if (firstButton) {
+                firstButton.focus();
+            }
+        }
+        
+        // ============================================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================================
+        
+        function initializeKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger shortcuts when typing in inputs
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                
+                // Don't trigger when modals are open
+                if (document.querySelector('.modal-overlay.active')) {
+                    return;
+                }
+                
+                const key = e.key.toLowerCase();
+                
+                switch (key) {
+                    case '/':
+                    case ' ':
+                        e.preventDefault();
+                        document.getElementById('searchInput')?.focus();
+                        break;
+                        
+                    case 'n':
+                        e.preventDefault();
+                        addTile();
+                        break;
+                        
+                    case 't':
+                        e.preventDefault();
+                        toggleTheme();
+                        break;
+                        
+                    case 'p':
+                        e.preventDefault();
+                        togglePrivacyMode();
+                        break;
+                        
+                    case 'escape':
+                        // Close modals or blur focus
+                        const activeModal = document.querySelector('.modal-overlay.active');
+                        if (activeModal) {
+                            activeModal.click();
+                        } else {
+                            document.activeElement?.blur();
+                        }
+                        break;
+                }
+            });
+        }
+        
+        // ============================================================================
+        // SERVICE WORKER
+        // ============================================================================
+        
+        function registerServiceWorker() {
+            if (!('serviceWorker' in navigator)) return;
+            if (location.protocol === 'file:') return; // Skip in file mode
+            
+            const swCode = `
+                const CACHE = 'smart-newtab-v1';
+                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                self.addEventListener('fetch', e => {
+                    if (e.request.method !== 'GET') return;
+                    const url = new URL(e.request.url);
+                    if (url.hostname.includes('openweathermap') || url.hostname.includes('weather')) return;
+                    e.respondWith(
+                        caches.match(e.request).then(cached =>
+                            cached || fetch(e.request).then(resp => {
+                                if (!resp || resp.status !== 200 || resp.type !== 'basic') return resp;
+                                const copy = resp.clone();
+                                caches.open(CACHE).then(c => c.put(e.request, copy));
+                                return resp;
+                            })
+                        )
+                    );
+                });
+            `;
+            
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swUrl)
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+        
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        
+        function initialize() {
+            // Load data
+            loadSettings();
+            loadTiles();
+            loadNotes();
+            loadTimerStats();
+            
+            // Apply settings
+            applyTheme();
+            applyPrivacyMode();
+            
+            // Initialize components
+            initializeSearch();
+            initializeNotes();
+            initializeKeyboardShortcuts();
+            
+            // Render UI
+            renderTiles();
+            updateTimerDisplay();
+            
+            // Start clock
+            updateClock();
+            updateGreeting();
+            setInterval(updateClock, 1000);
+            setInterval(updateGreeting, 60000); // Update greeting every minute
+            
+            // Load weather
+            updateWeather();
+            
+            // Set up weather refresh interval
+            setInterval(() => {
+                const now = Date.now();
+                if (now - weatherService.lastFetch > weatherService.refreshInterval) {
+                    updateWeather();
+                }
+            }, 60000); // Check every minute
+            
+            // Request notification permission
+            requestNotificationPermission();
+            
+            // Register service worker
+            registerServiceWorker();
+            
+            // Dark mode listener with fallback for Safari
+            const mq = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleThemeChange = () => {
+                if (AppState.settings.theme === 'auto') {
+                    applyTheme();
+                }
+            };
+            
+            if (mq.addEventListener) {
+                mq.addEventListener('change', handleThemeChange);
+            } else if (mq.addListener) {
+                mq.addListener(handleThemeChange);
+            }
+            
+            // Modal click handlers
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal-overlay')) {
+                    e.target.classList.remove('active');
+                    e.target.setAttribute('aria-hidden', 'true');
+                }
+            });
+            
+            // Window visibility change (pause timer when tab not visible)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && AppState.timer.isRunning) {
+                    // Don't pause, but could implement background behavior here
+                }
+            });
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        
+        // Start the application when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
+        
+        // ============================================================================
+        // GLOBAL FUNCTIONS (called by HTML event handlers)
+        // ============================================================================
+        
+        // Expose functions to global scope for HTML event handlers
+        window.toggleTheme = toggleTheme;
+        window.togglePrivacyMode = togglePrivacyMode;
+        window.openSettings = openSettings;
+        window.closeSettings = closeSettings;
+        window.switchSettingsTab = switchSettingsTab;
+        window.updateSetting = updateSetting;
+        window.testWeatherConnection = testWeatherConnection;
+        window.exportData = exportData;
+        window.importData = importData;
+        window.resetAllData = resetAllData;
+        window.runSystemTest = runSystemTest;
+        window.refreshWeather = refreshWeather;
+        window.addTile = addTile;
+        window.editTile = editTile;
+        window.openTileModal = openTileModal;
+        window.closeTileModal = closeTileModal;
+        window.saveTile = saveTile;
+        window.deleteTile = deleteTile;
+        window.openCommandModal = openCommandModal;
+        window.closeCommandModal = closeCommandModal;
+        window.saveCommand = saveCommand;
+        window.deleteCommand = deleteCommand;
+        window.startTimer = startTimer;
+        window.pauseTimer = pauseTimer;
+        window.resetTimer = resetTimer;
+        window.switchNotesTab = switchNotesTab;
+        window.copyTemplate = copyTemplate;
+        window.editTemplate = editTemplate;
+        window.deleteTemplate = deleteTemplate;
+        window.addTemplate = addTemplate;
+        window.selectSuggestion = selectSuggestion;
+        
+    </script>
+</body>
+</html>
