@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1626,34 +1627,31 @@
         
         // SECURITY: Safer icon validation and creation
         function createIcon(iconName, fallbackEmoji = '🌐') {
-            const container = document.createElement('span');
-            
-            // Check if it's an emoji (contains Unicode emoji characters)
-            const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
-            
-            if (emojiRegex.test(iconName)) {
-                container.textContent = iconName;
-                return container;
-            }
-            
-            // SECURITY: Validate against whitelist
-            if (!LUCIDE_ICONS.has(iconName)) {
-                container.textContent = fallbackEmoji;
-                return container;
-            }
-            
-            // Create Lucide icon
-            try {
-                const iconElement = document.createElement('i');
-                iconElement.setAttribute('data-lucide', iconName);
-                container.appendChild(iconElement);
-                return container;
-            } catch (error) {
-                // Fallback to emoji
-                container.textContent = fallbackEmoji;
-                return container;
-            }
-        }
+  const container = document.createElement('span');
+  const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
+
+  if (!iconName) { container.textContent = fallbackEmoji; return container; }
+
+  // Normalize user input: trim, lowercase, convert spaces/underscores to hyphens
+  const clean = String(iconName).trim().toLowerCase().replace(/[\s_]+/g, '-');
+
+  // If they typed an emoji, just show it
+  if (emojiRegex.test(iconName)) { container.textContent = iconName; return container; }
+
+  // Accept either a whitelist hit OR a real Lucide icon name present in the registry
+  const isLucide =
+    (window.lucide && window.lucide.icons && window.lucide.icons[clean]) ||
+    LUCIDE_ICONS.has(clean);
+
+  if (!isLucide) { container.textContent = fallbackEmoji; return container; }
+
+  const i = document.createElement('i');
+  i.setAttribute('data-lucide', clean);
+  container.appendChild(i);
+  return container;
+}
+
+           
         
         // PERFORMANCE: Only refresh icons when needed
         function refreshIconsIn(container) {
@@ -2657,7 +2655,8 @@
         function saveTile() {
             const title = document.getElementById('tileTitle').value.trim();
             const url = document.getElementById('tileUrl').value.trim();
-            const icon = document.getElementById('tileIcon').value.trim();
+const icon = (document.getElementById('tileIcon').value || '')
+  .trim().toLowerCase().replace(/[\s_]+/g,'-');
             const tag = document.getElementById('tileTag').value.trim();
             
             if (!title || !url) {
@@ -3002,7 +3001,9 @@
             const shortcut = document.getElementById('commandShortcut').value.trim();
             const name = document.getElementById('commandName').value.trim();
             const url = document.getElementById('commandUrl').value.trim();
-            const icon = document.getElementById('commandIcon').value.trim();
+            const icon = (document.getElementById('commandIcon').value || '')
+  .trim().toLowerCase().replace(/[\s_]+/g,'-');
+
             
             if (!shortcut || !name || !url) {
                 showAlert('Please fill in all required fields');
