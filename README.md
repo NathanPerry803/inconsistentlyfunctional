@@ -1,2 +1,2 @@
-# PharosPrime.github.io
-A fast and streamlined new tab
+# inconsistentlyfunctional
+My anti-grindset productivity blog for those who want to get a LOT done
