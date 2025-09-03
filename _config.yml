@@ -18,12 +18,14 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Your awesome title
-email: your-email@example.com
+title: Inconsistently Functional
+email: nathanperry662@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  A brutally honest blog for the neuro-spicy, fiercely ambitious, and proudly
+  inconsistent. Built by Nathan Perry and far too much caffeine, this isn’t a
+  “how-to-hustle” guide—it’s a real account of building, breaking, and
+  occasionally thriving in a world built for someone else’s definition of
+  functional. Sometimes genius, sometimes a mess, always authentic.
 
 # IMPORTANT: You must change these two settings for your site to work.
 # The baseurl is the name of your repository.
@@ -33,12 +35,18 @@ url: "https://nathanperry803.github.io"
 permalink: /:title/
 
 twitter_username: jekyllrb
-github_username:  jekyll
+github_username: jekyll
 
 # Build settings
-theme: minima
+theme: jekyll-clean-blog
 plugins:
   - jekyll-feed
+  - jekyll-clean-blog
+  - jekyll-sitemap
+  - jekyll-mentions
+  - jekyll-paginate
+
+# Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
 # the internal "default list".
