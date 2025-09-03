@@ -1,18 +1,6 @@
 ---
 layout: page
-title: About
+title: About IF
 permalink: /about/
 ---
-
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
-
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
-
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+Inconsistently Functional erfgergr brutally honest blog for the neuro-spicy, fiercely ambitious, and proudly inconsistent. Built by Nathan Perry and far too much caffeine, this isn’t a “how-to-hustle” guide—it’s a real account of building, breaking, and occasionally thriving in a world built for someone else’s definition of functional. Sometimes genius, sometimes a mess, always authentic.
