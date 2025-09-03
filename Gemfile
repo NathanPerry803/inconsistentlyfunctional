@@ -1,8 +1,6 @@
 source "https://rubygems.org"
 gem "jekyll", "~> 4.4.1"
-
-# The jekyll-remote-theme gem is required to use themes not officially supported by GitHub Pages.
-gem "jekyll-remote-theme"
+gem "minima", "~> 2.5"
 
 group :jekyll_plugins do
   gem "jekyll-feed"
