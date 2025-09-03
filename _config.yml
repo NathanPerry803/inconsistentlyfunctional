@@ -30,9 +30,6 @@ baseurl: "/inconsistentlyfunctional"
 url: "https://nathanperry803.github.io"
 permalink: /:title/
 
-twitter_username: jekyllrb
-github_username: jekyll
-
 # Build settings
 theme: minima
 plugins:
