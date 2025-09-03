@@ -38,13 +38,16 @@ twitter_username: jekyllrb
 github_username: jekyll
 
 # Build settings
-theme: jekyll-clean-blog
+theme: jekyll-feed
 plugins:
   - jekyll-feed
-  - jekyll-clean-blog
   - jekyll-sitemap
   - jekyll-mentions
   - jekyll-paginate
+  - jekyll-remote-theme
+
+# Add the remote theme here
+remote_theme: StartBootstrap/startbootstrap-clean-blog-jekyll
 
 # Exclude from processing.
 # The following items will not be processed, by default.
