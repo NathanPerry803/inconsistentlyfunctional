@@ -68,6 +68,4 @@ Here’s what you do today: pick one “symptom” you’ve been trained to mana
 
 Be consistently inconsistent. Be productively chaotic. Be gloriously, unapologetically, authentically unstoppable.
 
----
-
 **The world has no idea what’s coming.**
