@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: post
 title: "The Three-Capital Survival Guide: How to Spend Social, Financial, and Temporal Currency When You’re Inconsistently Functional"
 date: 2025-09-03 12:00:00 -0400
 categories: [productivity, neurodivergent, self-management, mindset, real-talk]
