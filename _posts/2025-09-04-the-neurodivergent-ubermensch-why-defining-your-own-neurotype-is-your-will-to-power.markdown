@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title: "The Neurodivergent Übermensch: Defining Your Own Neurotype as Will to Power"
 date: 2025-09-04 09:00:00 -0400
 categories: [neurodiversity, philosophy, self-acceptance, authenticity]
